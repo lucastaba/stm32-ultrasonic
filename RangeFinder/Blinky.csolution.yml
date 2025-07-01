@@ -1,0 +1,41 @@
+solution:
+  # A solution is a collection of related projects that share same base configuration
+
+  created-for: CMSIS-Toolbox@2.10.0
+  cdefault: # use cdefault.yml for default toolchain settings
+
+  select-compiler:
+    - compiler: GCC@13.3.1
+
+  compiler: GCC@13.3.1
+
+  language-C: c99
+
+  # List the packs that define the device and/or board, optional with minimum version
+  packs:
+    - pack: ARM::CMSIS@^6.2.0
+    - pack: ARM::CMSIS-Driver_STM32@^1.2.0
+    - pack: Keil::STM32F4xx_DFP@^3.0.0
+    - pack: WeActStudio::BlackPill@^1.0.0
+
+  # List different hardware targets that are used to deploy the solution
+  target-types:
+    - type: BlackPill
+      board: WeActStudio::BlackPill:3.0.0
+      target-set:
+        - set:
+          debugger:
+            name: ST-Link
+            protocol: swd
+          images:
+            - project-context: Blinky.Debug
+
+  # List different build types
+  build-types:
+    - type: Debug
+      debug: on
+      optimize: debug
+
+  # List related projects
+  projects:
+    - project: Blinky.cproject.yml

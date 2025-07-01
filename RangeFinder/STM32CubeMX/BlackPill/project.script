@@ -1,0 +1,5 @@
+load STM32F411CEUx
+project name STM32CubeMX
+project toolchain "STM32CubeIDE"
+project path "/home/ltaba/programming/arm/git/blackpill-bsp/Examples/Blinky/STM32CubeMX/BlackPill"
+SetCopyLibrary "copy only"

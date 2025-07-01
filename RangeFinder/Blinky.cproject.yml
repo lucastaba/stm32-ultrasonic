@@ -1,0 +1,25 @@
+project:
+# A project translates into one executable or library
+
+# List the packs that define the device and/or board
+  packs:
+    - pack: ARM::CMSIS@^6.2.0
+    - pack: ARM::CMSIS-Driver_STM32@^1.2.0
+    - pack: Keil::STM32F4xx_DFP@^3.0.0
+    - pack: WeActStudio::BlackPill@^1.0.0
+
+  groups:
+    - group: Source Files
+      files: 
+        - file: Blinky.c
+
+# A software component is a re-usable unit that may be configurable
+  components:                  # List components to use for your application
+    - component: ARM::CMSIS:CORE@6.1.1
+    - component: Keil::CMSIS Driver:GPIO@1.2.0
+    - component: Keil::Device:CubeMX@1.0.0
+    - component: WeActStudio::CMSIS Driver:VIO:Board@1.0.0
+  
+  linker:
+    - script: STM32CubeMX/BlackPill/STM32CubeMX/STM32CubeIDE/STM32F411CEUX_FLASH.ld
+    - for-compiler: GCC
