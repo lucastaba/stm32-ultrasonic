@@ -28,7 +28,7 @@ solution:
             name: ST-Link
             protocol: swd
           images:
-            - project-context: Blinky.Debug
+            - project-context: RangeFinder.Debug
 
   # List different build types
   build-types:
@@ -38,4 +38,4 @@ solution:
 
   # List related projects
   projects:
-    - project: Blinky.cproject.yml
+    - project: RangeFinder.cproject.yml
