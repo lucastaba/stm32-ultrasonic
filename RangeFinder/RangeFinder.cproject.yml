@@ -14,8 +14,8 @@ project:
         - file: RangeFinder.c
     - group: Display Driver
       files:
-        - file: Display/Driver/Src/sd1306_reg.c
-        - file: Display/Driver/Inc/sd1306_reg.h
+        - file: Display/Driver/Src/ssd1306_reg.c
+        - file: Display/Driver/Inc/ssd1306_reg.h
 
 # A software component is a re-usable unit that may be configurable
   components:                  # List components to use for your application
