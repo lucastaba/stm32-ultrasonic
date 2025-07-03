@@ -57,6 +57,8 @@ extern void main_app(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define I2C1_PERIPH_CLOCK_FREQ 400000
+#define I2C2_PERIPH_CLOCK_FREQ 400000
 #define LED_Pin GPIO_PIN_13
 #define LED_GPIO_Port GPIOC
 

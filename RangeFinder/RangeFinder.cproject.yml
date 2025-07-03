@@ -21,6 +21,7 @@ project:
   components:                  # List components to use for your application
     - component: ARM::CMSIS:CORE@6.1.1
     - component: Keil::CMSIS Driver:GPIO@1.2.0
+    - component: Keil::CMSIS Driver:I2C@3.0.0
     - component: Keil::Device:CubeMX@1.0.0
     - component: WeActStudio::CMSIS Driver:VIO:Board@1.0.0
   

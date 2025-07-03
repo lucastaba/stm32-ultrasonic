@@ -5,6 +5,9 @@
 #define SD1306_I2C_ADDR_0                                   (0x3C)
 #define SD1306_I2C_ADDR_1                                   (0x3D)
 
+#define SD1306_CTRL_BYTE_CMD                                (0x00)
+#define SD1306_CTRL_BYTE_DATA                               (0x40)
+
 /* Common Commands */
 #define SD1306_CMD_FUNDAMENTAL_SET_CONTRAST                 (0x81)
 #define SD1306_CMD_FUNDAMENTAL_SET_DISPLAY_RESUME_TO_RAM    (0xA4)
@@ -77,20 +80,17 @@
 #define SD1306_CMD_SUCCESS         (0)
 #define SD1306_CMD_I2C_WRITE_ERROR (-1)
 
-int32_t sd1306_i2c_write_cmd(sd1306_reg_t* obj, const uint8_t* cmd, const uint8_t cmd_len) {
-    int32_t ret = SD1306_CMD_SUCCESS;
-    if (obj->i2c_write(cmd, cmd_len) != 0) {
-        ret = SD1306_CMD_I2C_WRITE_ERROR;
-    }
-    return ret;
+static int32_t sd1306_i2c_write_cmd(sd1306_reg_t* obj, const uint8_t* cmd, const uint8_t cmd_len) {
+    return obj->i2c_write(obj->obj, cmd, cmd_len);
 }
 
-int32_t sd1306_i2c_read_data(sd1306_reg_t* obj, uint8_t* data, uint8_t data_len) {
-    return obj->i2c_read(data, data_len);
+static int32_t sd1306_i2c_read_data(sd1306_reg_t* obj, uint8_t* data, uint8_t data_len) {
+    return obj->i2c_read(obj->obj, data, data_len);
 }
 
-int32_t sd1306_fundamental_set_column_address(sd1306_reg_t* obj, uint8_t contrast_value) {
+int32_t sd1306_fundamental_set_contrast(sd1306_reg_t* obj, uint8_t contrast_value) {
     const uint8_t cmd[] = {
+        SD1306_CTRL_BYTE_CMD,
         SD1306_CMD_FUNDAMENTAL_SET_CONTRAST,
         contrast_value,
     };
@@ -99,6 +99,7 @@ int32_t sd1306_fundamental_set_column_address(sd1306_reg_t* obj, uint8_t contras
 
 int32_t sd1306_fundamental_set_display_resume_to_ram(sd1306_reg_t* obj) {
     const uint8_t cmd[] = {
+        SD1306_CTRL_BYTE_CMD,
         SD1306_CMD_FUNDAMENTAL_SET_DISPLAY_RESUME_TO_RAM,
     };
     return sd1306_i2c_write_cmd(obj, cmd, sizeof(cmd)/sizeof(*cmd));
@@ -106,12 +107,14 @@ int32_t sd1306_fundamental_set_display_resume_to_ram(sd1306_reg_t* obj) {
 
 int32_t sd1306_fundamental_set_display_all_on(sd1306_reg_t* obj) {
     const uint8_t cmd[] = {
+        SD1306_CTRL_BYTE_CMD,
         SD1306_CMD_FUNDAMENTAL_SET_DISPLAY_ALL_ON,
     };
     return sd1306_i2c_write_cmd(obj, cmd, sizeof(cmd)/sizeof(*cmd));
 }
 int32_t sd1306_fundamental_set_display_normal(sd1306_reg_t* obj) {
     const uint8_t cmd[] = {
+        SD1306_CTRL_BYTE_CMD,
         SD1306_CMD_FUNDAMENTAL_SET_DISPLAY_NORMAL,
     };
     return sd1306_i2c_write_cmd(obj, cmd, sizeof(cmd)/sizeof(*cmd));
@@ -119,6 +122,7 @@ int32_t sd1306_fundamental_set_display_normal(sd1306_reg_t* obj) {
 
 int32_t sd1306_fundamental_set_display_inverse(sd1306_reg_t* obj) {
     const uint8_t cmd[] = {
+        SD1306_CTRL_BYTE_CMD,
         SD1306_CMD_FUNDAMENTAL_SET_DISPLAY_INVERSE,
     };
     return sd1306_i2c_write_cmd(obj, cmd, sizeof(cmd)/sizeof(*cmd));
@@ -126,6 +130,7 @@ int32_t sd1306_fundamental_set_display_inverse(sd1306_reg_t* obj) {
 
 int32_t sd1306_fundamental_set_display_off(sd1306_reg_t* obj) {
     const uint8_t cmd[] = {
+        SD1306_CTRL_BYTE_CMD,
         SD1306_CMD_FUNDAMENTAL_SET_DISPLAY_OFF,
     };
     return sd1306_i2c_write_cmd(obj, cmd, sizeof(cmd)/sizeof(*cmd));
@@ -133,7 +138,26 @@ int32_t sd1306_fundamental_set_display_off(sd1306_reg_t* obj) {
 
 int32_t sd1306_fundamental_set_display_on(sd1306_reg_t* obj) {
     const uint8_t cmd[] = {
+        SD1306_CTRL_BYTE_CMD,
         SD1306_CMD_FUNDAMENTAL_SET_DISPLAY_ON,
+    };
+    return sd1306_i2c_write_cmd(obj, cmd, sizeof(cmd)/sizeof(*cmd));
+}
+
+int32_t sd1306_hw_config_set_multiplex_ratio(sd1306_reg_t* obj, const uint8_t multiplex_ratio) {
+        const uint8_t cmd[] = {
+        SD1306_CTRL_BYTE_CMD,
+        SD1306_CMD_HW_CONFIG_SET_MULTIPLEX_RATIO,
+        multiplex_ratio,
+    };
+    return sd1306_i2c_write_cmd(obj, cmd, sizeof(cmd)/sizeof(*cmd));
+}
+
+int32_t sd1306_hw_config_set_com_pin_config(sd1306_reg_t* obj, const uint8_t com_pin_config) {
+    const uint8_t cmd[] = {
+        SD1306_CTRL_BYTE_CMD,
+        SD1306_CMD_HW_CONFIG_SET_COM_PIN_CONFIG,
+        com_pin_config,
     };
     return sd1306_i2c_write_cmd(obj, cmd, sizeof(cmd)/sizeof(*cmd));
 }
