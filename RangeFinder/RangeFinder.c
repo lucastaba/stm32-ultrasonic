@@ -10,6 +10,7 @@
 #include "main.h"
 #include "ssd1306_reg.h"
 
+#include "stm32f4xx_hal_i2c.h"
 typedef struct {
     ARM_DRIVER_I2C* pDrv;
     ssd1306_reg_t reg;
@@ -25,7 +26,7 @@ static ARM_DRIVER_I2C* pI2Cdrv = &Driver_I2C1;
 ssd1306_obj_t ssd1306_obj;
 
 void main_app(void) {
-    int32_t ret;
+    volatile int32_t ret;
     vioInit();
     (void)(pI2Cdrv->Initialize(NULL));
     (void)(pI2Cdrv->PowerControl(ARM_POWER_FULL));
@@ -34,24 +35,52 @@ void main_app(void) {
     ssd1306_obj.reg.i2c_read = i2c_read_wrap;
     ssd1306_obj.reg.obj = &ssd1306_obj;
 
+    delay(100U);
+    while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_fundamental_set_display_on(&ssd1306_obj.reg, 0x00);
+    while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_hw_config_set_multiplex_ratio(&ssd1306_obj.reg, 0x1F);
+    while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_hw_config_set_display_offset(&ssd1306_obj.reg, 0x00);
+    while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_hw_config_set_display_start_line(&ssd1306_obj.reg, 0x00);
+    while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_hw_config_set_segment_remap(&ssd1306_obj.reg, 0x00);
+    while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_hw_config_set_com_output_scan_direction(&ssd1306_obj.reg, 0x00);
+    while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_hw_config_set_com_pin_config(&ssd1306_obj.reg, 0x00);
-    ret = ssd1306_fundamental_set_contrast(&ssd1306_obj.reg, 0x7F);
+    while (pI2Cdrv->GetStatus().busy) {}
+    ret = ssd1306_fundamental_set_contrast(&ssd1306_obj.reg, 0x1F);
+    while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_fundamental_set_entire_display_on(&ssd1306_obj.reg, 0x01);
-    /* TODO: set display frequency */
-    /* TODO: enable charge pump */
+    while (pI2Cdrv->GetStatus().busy) {}
+    ret = ssd1306_fundamental_set_display_normal_or_inverse(&ssd1306_obj.reg, 0x00);
+    while (pI2Cdrv->GetStatus().busy) {}
+    ret = ssd1306_timing_and_driving_scheme_set_display_clock_div(&ssd1306_obj.reg, 0xF0);
+    while (pI2Cdrv->GetStatus().busy) {}
+    ret = ssd1306_charge_pump_set_charge_pump(&ssd1306_obj.reg, 0x01);
+    while (pI2Cdrv->GetStatus().busy) {}
+    ret = ssd1306_fundamental_set_display_on(&ssd1306_obj.reg, 0x01);
+    while (pI2Cdrv->GetStatus().busy) {}
 
+    int16_t contrast = 0;
+    int8_t ratio = 50;
+    int8_t direction = ratio;
     while (1) {
+        while (pI2Cdrv->GetStatus().busy) {}
+        ret = ssd1306_fundamental_set_contrast(&ssd1306_obj.reg, (uint8_t)(contrast));
+        contrast += direction;
+        if (contrast > (uint16_t)(0x00FFU)) {
+            direction = -ratio;
+            contrast = 0x00FFU;
+        } else if (contrast < (uint16_t)(0x0000U)) {
+            direction = ratio;
+            contrast = 0x0000U;
+        }
         vioSetSignal(vioLED3, vioLEDon);
-        ret = ssd1306_fundamental_set_display_on(&ssd1306_obj.reg, 0x01);
         delay(500U);
         vioSetSignal(vioLED3, vioLEDoff);
-        ret = ssd1306_fundamental_set_display_on(&ssd1306_obj.reg, 0x00);
         delay(500U);
     }
     (void)(pI2Cdrv->PowerControl(ARM_POWER_OFF));
@@ -72,15 +101,11 @@ static void delay(uint32_t ms) {
 }
 
 int32_t i2c_write(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, const uint8_t* cmd ,const uint8_t cmd_len) {
-    int32_t ret;
-    if ((ret = pDrv->MasterTransmit((uint32_t)(slave_addr), cmd, (uint32_t)(cmd_len), false)) == ARM_DRIVER_OK) {
-        while ((ret = pDrv->GetDataCount()) > 0 && ret != cmd_len) {}
-    }
-    return ret;
+    return pDrv->MasterTransmit((uint32_t)(slave_addr), cmd, (uint32_t)(cmd_len), false);
 }
 
 int32_t i2c_read(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, uint8_t* data, const uint8_t data_len) {
-    return 0;
+	return 0;
 }
 
 int32_t i2c_write_wrap(void* obj, const uint8_t* cmd ,const uint8_t cmd_len) {

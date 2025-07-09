@@ -1,6 +1,6 @@
 /******************************************************************************
  * File Name   : MX_Device.h
- * Date        : 02/07/2025 19:56:50
+ * Date        : 07/07/2025 14:49:21
  * Description : STM32Cube MX parameter definitions
  * Note        : This file is generated with a generator out of the
  *               STM32CubeMX project and its generated files (DO NOT EDIT!)
@@ -17,7 +17,7 @@
 #define MX_I2C1                                 1
 
 /* Peripheral Clock Frequency */
-#define MX_I2C1_PERIPH_CLOCK_FREQ               400000
+#define MX_I2C1_PERIPH_CLOCK_FREQ               100000
 
 /* Pins */
 
@@ -38,31 +38,5 @@
 #define MX_I2C1_SDA_GPIO_PuPd                   GPIO_NOPULL
 #define MX_I2C1_SDA_GPIO_Speed                  GPIO_SPEED_FREQ_VERY_HIGH
 #define MX_I2C1_SDA_GPIO_AF                     GPIO_AF4_I2C1
-
-/*------------------------------ I2C2           -----------------------------*/
-#define MX_I2C2                                 1
-
-/* Peripheral Clock Frequency */
-#define MX_I2C2_PERIPH_CLOCK_FREQ               400000
-
-/* Pins */
-
-/* I2C2_SCL */
-#define MX_I2C2_SCL_Pin                         PB10
-#define MX_I2C2_SCL_GPIO_Pin                    GPIO_PIN_10
-#define MX_I2C2_SCL_GPIOx                       GPIOB
-#define MX_I2C2_SCL_GPIO_Mode                   GPIO_MODE_AF_OD
-#define MX_I2C2_SCL_GPIO_PuPd                   GPIO_NOPULL
-#define MX_I2C2_SCL_GPIO_Speed                  GPIO_SPEED_FREQ_VERY_HIGH
-#define MX_I2C2_SCL_GPIO_AF                     GPIO_AF4_I2C2
-
-/* I2C2_SDA */
-#define MX_I2C2_SDA_Pin                         PB3
-#define MX_I2C2_SDA_GPIO_Pin                    GPIO_PIN_3
-#define MX_I2C2_SDA_GPIOx                       GPIOB
-#define MX_I2C2_SDA_GPIO_Mode                   GPIO_MODE_AF_OD
-#define MX_I2C2_SDA_GPIO_PuPd                   GPIO_NOPULL
-#define MX_I2C2_SDA_GPIO_Speed                  GPIO_SPEED_FREQ_VERY_HIGH
-#define MX_I2C2_SDA_GPIO_AF                     GPIO_AF9_I2C2
 
 #endif  /* MX_DEVICE_H__ */
