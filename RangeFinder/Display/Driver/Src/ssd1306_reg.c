@@ -132,10 +132,27 @@ int32_t ssd1306_fundamental_set_display_on(ssd1306_reg_t* obj, const uint8_t on)
     return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 2);
 }
 
-int32_t ssd1306_fundamental_set_display_off(ssd1306_reg_t* obj, const uint8_t on) {
-    ssd1306_data_buffer[0] = SSD1306_CTRL_BYTE_CMD;
-    ssd1306_data_buffer[1] = SSD1306_CMD_FUNDAMENTAL_SET_DISPLAY_ON | (SSD1306_CMD_FUNDAMENTAL_SET_DISPLAY_ON_MASK & 0x00);
-    return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 2);
+int32_t ssd1306_scrolling_continuous_horizontal_scroll_setup(ssd1306_reg_t* obj, const uint8_t direction,const uint8_t start_page, const uint8_t end_page, const uint8_t interval) {
+    return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
+}
+int32_t ssd1306_scrolling_continuous_vertical_scroll_setup(ssd1306_reg_t* obj, const uint8_t direction,const uint8_t start_page, const uint8_t end_page, const uint8_t interval, const uint8_t offset) {
+    return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
+}
+int32_t ssd1306_scrolling_activate(ssd1306_reg_t* obj) {
+    return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
+}
+int32_t ssd1306_scrolling_deactivate(ssd1306_reg_t* obj) {
+    return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
+}
+int32_t ssd1306_scrolling_set_scroll_vertical_scroll_area(ssd1306_reg_t* obj, const uint8_t n_rows_top_fixed, const uint8_t n_rows) {
+    return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
+}
+
+int32_t ssd1306_addressing_set_page_address_for_horizotal_vertical_addressing_mode(ssd1306_reg_t* obj, const uint8_t start_page_address, const uint8_t end_page_address) {
+    return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
+}
+int32_t ssd1306_addressing_set_page_address_for_page_addressing_mode(ssd1306_reg_t* obj, const uint8_t start_page_address) {
+    return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
 }
 
 int32_t ssd1306_hw_config_set_display_start_line(ssd1306_reg_t* obj, const uint8_t start_line) {
@@ -180,6 +197,18 @@ int32_t ssd1306_timing_and_driving_scheme_set_display_clock_div(ssd1306_reg_t* o
     ssd1306_data_buffer[0] = SSD1306_CTRL_BYTE_CMD;
     ssd1306_data_buffer[1] = SSD1306_CMD_TIMING_SET_DISPLAY_CLK_DIVIDE_RATIO_AND_FREQ;
     ssd1306_data_buffer[2] = clock_div;
+    return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
+}
+
+int32_t ssd1306_timing_and_driving_scheme_set_pre_charge_period(ssd1306_reg_t* obj, const uint8_t phase_1, const uint8_t phase_2) {
+    return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
+}
+
+int32_t ssd1306_timing_and_driving_scheme_set_vcomh_deselect_level(ssd1306_reg_t* obj, const uint8_t level) {
+    return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
+}
+
+int32_t ssd1306_timing_and_driving_scheme_nop(ssd1306_reg_t* obj) {
     return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
 }
 
