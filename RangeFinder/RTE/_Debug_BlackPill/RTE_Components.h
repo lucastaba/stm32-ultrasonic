@@ -9,6 +9,10 @@
 #ifndef RTE_COMPONENTS_H
 #define RTE_COMPONENTS_H
 
+/* ARM::CMSIS:RTOS2:Keil RTX5&Source@5.9.0 */
+#define RTE_CMSIS_RTOS2                 /* CMSIS-RTOS2 */
+#define RTE_CMSIS_RTOS2_RTX5            /* CMSIS-RTOS2 Keil RTX5 */
+#define RTE_CMSIS_RTOS2_RTX5_SOURCE     /* CMSIS-RTOS2 Keil RTX5 Source */
 /* Keil::CMSIS Driver:GPIO@1.2.0 */
 #define RTE_Drivers_GPIO0               /* Driver GPIO0 */
 /* Keil::CMSIS Driver:I2C@3.0.0 */

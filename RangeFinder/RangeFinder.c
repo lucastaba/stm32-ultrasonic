@@ -4,19 +4,18 @@
 #include "Driver_Common.h"
 #include "Driver_I2C.h"
 #include "cmsis_vio.h"
+#include "cmsis_os2.h"
 
 #include "I2C_STM32.h"
 
 #include "main.h"
 #include "ssd1306_reg.h"
-
-#include "stm32f4xx_hal_i2c.h"
 typedef struct {
     ARM_DRIVER_I2C* pDrv;
     ssd1306_reg_t reg;
 } ssd1306_obj_t;
 
-static void delay(uint32_t ms);
+static void main_thread(void* args);
 int32_t i2c_write(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, const uint8_t* cmd ,const uint8_t cmd_len);
 int32_t i2c_read(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, uint8_t* data, const uint8_t data_len);
 int32_t i2c_write_wrap(void* obj, const uint8_t* cmd ,const uint8_t cmd_len);
@@ -24,9 +23,11 @@ int32_t i2c_read_wrap(void* obj, uint8_t* data, const uint8_t data_len);
 
 static ARM_DRIVER_I2C* pI2Cdrv = &Driver_I2C1;
 ssd1306_obj_t ssd1306_obj;
+osThreadId_t main_thread_id;
 
 void main_app(void) {
-    volatile int32_t ret;
+    volatile osStatus_t status;
+
     vioInit();
     (void)(pI2Cdrv->Initialize(NULL));
     (void)(pI2Cdrv->PowerControl(ARM_POWER_FULL));
@@ -34,8 +35,36 @@ void main_app(void) {
     ssd1306_obj.reg.i2c_write = i2c_write_wrap;
     ssd1306_obj.reg.i2c_read = i2c_read_wrap;
     ssd1306_obj.reg.obj = &ssd1306_obj;
+    status = osKernelInitialize();
+    main_thread_id = osThreadNew(main_thread, NULL, NULL);
+    status = osKernelStart();
 
-    delay(100U);
+    while (1){}
+
+    (void)(pI2Cdrv->PowerControl(ARM_POWER_OFF));
+    (void)(pI2Cdrv->Uninitialize());
+}
+
+int32_t i2c_write(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, const uint8_t* cmd ,const uint8_t cmd_len) {
+    return pDrv->MasterTransmit((uint32_t)(slave_addr), cmd, (uint32_t)(cmd_len), false);
+}
+
+int32_t i2c_read(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, uint8_t* data, const uint8_t data_len) {
+	return 0;
+}
+
+int32_t i2c_write_wrap(void* obj, const uint8_t* cmd ,const uint8_t cmd_len) {
+    return i2c_write(((ssd1306_obj_t*)obj)->pDrv, 0x3C, cmd, cmd_len);
+}
+
+int32_t i2c_read_wrap(void* obj, uint8_t* data, const uint8_t data_len) {
+    return i2c_read(((ssd1306_obj_t*)obj)->pDrv, 0x3C, data, data_len);
+}
+
+static void main_thread(void* args) {
+    volatile int32_t ret;
+
+    osDelay(100U);
     while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_fundamental_set_display_on(&ssd1306_obj.reg, 0x00);
     while (pI2Cdrv->GetStatus().busy) {}
@@ -79,39 +108,8 @@ void main_app(void) {
             contrast = 0x0000U;
         }
         vioSetSignal(vioLED3, vioLEDon);
-        delay(500U);
+        osDelay(500U);
         vioSetSignal(vioLED3, vioLEDoff);
-        delay(500U);
+        osDelay(500U);
     }
-    (void)(pI2Cdrv->PowerControl(ARM_POWER_OFF));
-    (void)(pI2Cdrv->Uninitialize());
-}
-
-static void delay(uint32_t ms) {
-    uint32_t delayTime;
-
-    if (ms > ((UINT32_MAX / 100000U) * 4U)) {
-        return;
-    }
-
-    delayTime = ms * 100000U / 4U;
-    while (delayTime--) {
-        __NOP();
-    }
-}
-
-int32_t i2c_write(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, const uint8_t* cmd ,const uint8_t cmd_len) {
-    return pDrv->MasterTransmit((uint32_t)(slave_addr), cmd, (uint32_t)(cmd_len), false);
-}
-
-int32_t i2c_read(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, uint8_t* data, const uint8_t data_len) {
-	return 0;
-}
-
-int32_t i2c_write_wrap(void* obj, const uint8_t* cmd ,const uint8_t cmd_len) {
-    return i2c_write(((ssd1306_obj_t*)obj)->pDrv, 0x3C, cmd, cmd_len);
-}
-
-int32_t i2c_read_wrap(void* obj, uint8_t* data, const uint8_t data_len) {
-    return i2c_read(((ssd1306_obj_t*)obj)->pDrv, 0x3C, data, data_len);
 }
