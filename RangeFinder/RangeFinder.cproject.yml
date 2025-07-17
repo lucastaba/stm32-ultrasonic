@@ -15,6 +15,7 @@ project:
       files:
         - file: RangeFinder.c
         - file: USBD_User_CDC_ACM_0.c
+        - file: display_driver_cmd_helper.c
     - group: Display Driver
       files:
         - file: Display/Driver/Src/ssd1306_reg.c

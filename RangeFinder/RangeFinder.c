@@ -12,6 +12,9 @@
 
 #include "main.h"
 #include "ssd1306_reg.h"
+
+#define CMD_RECEIVED_FLAG (1U << 0U)
+
 typedef struct {
     ARM_DRIVER_I2C* pDrv;
     ssd1306_reg_t reg;
@@ -29,7 +32,7 @@ static ARM_DRIVER_I2C* pI2Cdrv = &Driver_I2C1;
 ssd1306_obj_t ssd1306_obj;
 osThreadId_t main_thread_id;
 osThreadId_t usbd_thread_id;
-extern int32_t acm_state;
+osEventFlagsId_t usbd_ef;
 
 void main_app(void) {
     volatile osStatus_t status;
@@ -44,6 +47,7 @@ void main_app(void) {
     status = osKernelInitialize();
     main_thread_id = osThreadNew(main_thread, NULL, NULL);
     usbd_thread_id = osThreadNew(usbd_thread, NULL, NULL);
+    usbd_ef = osEventFlagsNew(NULL);
     status = osKernelStart();
 
     while (1){}
@@ -121,30 +125,21 @@ static void main_thread(void* args) {
     }
 }
 
+extern uint8_t cmd[256];
+extern uint8_t rx_count;
 static void usbd_thread(void* args) {
     (void)args;
-    const char hello_str[] = "Hello World\r\n";
-    volatile int32_t ret;
+    const char cmd_prompt_str[] = "Enter display command: ";
+    const char cr_lf[] = "\r\n";
 
     USBD_Initialize(0U);
     USBD_Connect(0U);
-    while (!USBD_GetState(0).active) {
-        osDelay(5);
-    }
-    acm_state = 1;
-    USBD_CDC_ACM_WriteData(0, (uint8_t*)(void*)hello_str, strlen(hello_str));
-    while (acm_state != 0) {
-        osDelay(5);
+
+    for (;;) {
+        USBD_CDC_ACM_WriteData(0, (uint8_t*)(void*)cmd_prompt_str, strlen(cmd_prompt_str));
+        (void)osEventFlagsWait(usbd_ef, CMD_RECEIVED_FLAG, osFlagsWaitAny, osWaitForever);
     }
 
-    while (1) {
-        acm_state = 1;
-        ret = USBD_CDC_ACM_WriteData(0, (uint8_t*)((void*)hello_str), strlen(hello_str));
-        while (acm_state != 0) {
-            osDelay(5);
-        }
-        osDelay(1000U);
-    }
 }
 
 void HAL_Delay(uint32_t Delay) {

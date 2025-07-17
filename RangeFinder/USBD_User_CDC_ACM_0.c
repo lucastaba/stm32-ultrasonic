@@ -33,21 +33,35 @@
 #include <string.h>
  
 #include "rl_usb.h"
+#include "cmsis_os2.h"
+
+/* API prototypes to handle commands */
+#define MAX_CMD_SIZE (4U) /* find better solution */
+#define DEFAULT_PORT (0U)
+#define RX_BUF_SIZE  (256U)
+#define CMD_RECEIVED_FLAG (1U << 0U)
+
+typedef struct {
+  uint8_t type;
+  uint8_t cmd_size;
+  uint8_t data[MAX_CMD_SIZE];
+} DISPLAY_DRIVER_CMD_t;
+
+extern int32_t display_driver_get_cmd_len(uint8_t cmd_type);
+extern int32_t display_driver_populate_cmd_struct(uint8_t cmd_type, uint8_t* data, DISPLAY_DRIVER_CMD_t* cmd);
+extern int32_t display_driver_exec_cmd(DISPLAY_DRIVER_CMD_t* cmd);
+extern osEventFlagsId_t usbd_ef;
  
 // Local Variables
 static   CDC_LINE_CODING        cdc_acm_line_coding = { 0U, 0U, 0U, 0U };
-typedef enum {
-  IDLE = 0,
-  SENDING,
-  RECEIVING,
-} USB_ACM_STATE_t;
-USB_ACM_STATE_t acm_state;
- 
+static uint8_t cdc_rx_buf[RX_BUF_SIZE];
+uint8_t cmd[RX_BUF_SIZE];
+uint8_t rx_count;
+static uint16_t rx_size;
  
 // Called during USBD_Initialize to initialize the USB CDC class instance (ACM).
 void USBD_CDC0_ACM_Initialize (void) {
   // Add code for initialization
-  acm_state = IDLE;
 }
  
  
@@ -132,18 +146,58 @@ bool USBD_CDC0_ACM_SetControlLineState (uint16_t state) {
   return true;
 }
  
-static uint8_t cdc_rx_buf[64];
-static uint8_t cdc_tx_buf[64];
+
+typedef enum {
+  IDLE = 0,
+  RECEIVING,
+} ACM_DATA_STATE_t;
+static ACM_DATA_STATE_t state = IDLE;
+
 // Called when new data was received.
 // \param [in]  len           number of bytes available for reading.
 void USBD_CDC0_ACM_DataReceived (uint32_t len) {
   // Add code for handling new data reception
-  USBD_CDC_ACM_ReadData(0, cdc_rx_buf, len);
-  if (len > 0) {
-      // Echo back the received data
-    memset(cdc_tx_buf, 0, sizeof(cdc_tx_buf));
-    snprintf((char*)(void*)cdc_tx_buf, sizeof(cdc_tx_buf) - 3, "%s\r\n", cdc_rx_buf);
-    USBD_CDC_ACM_WriteData(0, cdc_tx_buf, len + 2);
+  int i = 0;
+  int char_data;
+  switch (state) {
+    case IDLE:
+      memset(cdc_rx_buf, 0, sizeof(cdc_rx_buf));
+      rx_count = 0;
+      rx_size = RX_BUF_SIZE;
+      state = RECEIVING;
+    case RECEIVING:
+      if (len > rx_size) {
+        /* buffer overflow */
+        state = IDLE;
+        return;
+      }
+
+      for (; i < len; i++) {
+        char_data = USBD_CDC_ACM_GetChar(DEFAULT_PORT);
+        if (char_data < 0) {
+          /* Error getting data, back to IDLE */
+          state = IDLE;
+          return;
+        }
+
+        /* Echo received char to VCOM */
+        USBD_CDC_ACM_PutChar(DEFAULT_PORT, char_data);
+
+        if ((char)char_data == '\r') { /* Carriege Return (Enter Key)*/
+          USBD_CDC_ACM_PutChar(DEFAULT_PORT, (int)'\n');
+          memcpy(cmd, cdc_rx_buf, rx_count);
+          state = IDLE;
+          /* notify cmd received */
+          (void)osEventFlagsSet(usbd_ef, CMD_RECEIVED_FLAG);
+          return;
+        }
+
+        cdc_rx_buf[rx_count] = (uint8_t)((char)char_data);
+        rx_count++;
+        rx_size--;
+      }
+    default:
+      break;
   }
 }
  
@@ -151,7 +205,6 @@ void USBD_CDC0_ACM_DataReceived (uint32_t len) {
 // Called when when all data was sent.
 void USBD_CDC0_ACM_DataSent (void) {
   // Add code for handling new data send
-  acm_state = IDLE;
 }
 
 //! [code_USBD_User_CDC_ACM]
