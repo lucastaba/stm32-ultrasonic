@@ -1,10 +1,12 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "Driver_Common.h"
 #include "Driver_I2C.h"
 #include "cmsis_vio.h"
 #include "cmsis_os2.h"
+#include "rl_usb.h"
 
 #include "I2C_STM32.h"
 
@@ -16,6 +18,8 @@ typedef struct {
 } ssd1306_obj_t;
 
 static void main_thread(void* args);
+static void usbd_thread(void* args);
+
 int32_t i2c_write(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, const uint8_t* cmd ,const uint8_t cmd_len);
 int32_t i2c_read(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, uint8_t* data, const uint8_t data_len);
 int32_t i2c_write_wrap(void* obj, const uint8_t* cmd ,const uint8_t cmd_len);
@@ -24,6 +28,8 @@ int32_t i2c_read_wrap(void* obj, uint8_t* data, const uint8_t data_len);
 static ARM_DRIVER_I2C* pI2Cdrv = &Driver_I2C1;
 ssd1306_obj_t ssd1306_obj;
 osThreadId_t main_thread_id;
+osThreadId_t usbd_thread_id;
+extern int32_t acm_state;
 
 void main_app(void) {
     volatile osStatus_t status;
@@ -37,6 +43,7 @@ void main_app(void) {
     ssd1306_obj.reg.obj = &ssd1306_obj;
     status = osKernelInitialize();
     main_thread_id = osThreadNew(main_thread, NULL, NULL);
+    usbd_thread_id = osThreadNew(usbd_thread, NULL, NULL);
     status = osKernelStart();
 
     while (1){}
@@ -112,4 +119,34 @@ static void main_thread(void* args) {
         vioSetSignal(vioLED3, vioLEDoff);
         osDelay(500U);
     }
+}
+
+static void usbd_thread(void* args) {
+    (void)args;
+    const char hello_str[] = "Hello World\r\n";
+    volatile int32_t ret;
+
+    USBD_Initialize(0U);
+    USBD_Connect(0U);
+    while (!USBD_GetState(0).active) {
+        osDelay(5);
+    }
+    acm_state = 1;
+    USBD_CDC_ACM_WriteData(0, (uint8_t*)(void*)hello_str, strlen(hello_str));
+    while (acm_state != 0) {
+        osDelay(5);
+    }
+
+    while (1) {
+        acm_state = 1;
+        ret = USBD_CDC_ACM_WriteData(0, (uint8_t*)((void*)hello_str), strlen(hello_str));
+        while (acm_state != 0) {
+            osDelay(5);
+        }
+        osDelay(1000U);
+    }
+}
+
+void HAL_Delay(uint32_t Delay) {
+    osDelay(Delay);
 }

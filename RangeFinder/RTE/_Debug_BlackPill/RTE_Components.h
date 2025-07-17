@@ -24,9 +24,20 @@
 #define RTE_Drivers_I2C6                /* Driver I2C6 */
 #define RTE_Drivers_I2C7                /* Driver I2C7 */
 #define RTE_Drivers_I2C8                /* Driver I2C8 */
+/* Keil::CMSIS Driver:USB Device@3.1.0 */
+#define RTE_Drivers_USBD0               /* Driver USBD0 */
+#define RTE_Drivers_USBD1               /* Driver USBD1 */
 /* Keil::Device:CubeMX@1.0.0 */
 #define RTE_DEVICE_CUBE_MX
 #define CMSIS_device_header "stm32f4xx.h"
+/* Keil::USB&MDK:CORE@8.0.0 */
+#define RTE_USB_Core                    /* USB Core */
+/* Keil::USB&MDK:Device:CDC@8.0.0 */
+#define RTE_USB_Device_CDC_0            /* USB Device CDC instance 0 */
+
+/* Keil::USB&MDK:Device@8.0.0 */
+#define RTE_USB_Device_0                /* USB Device 0 */
+
 /* WeActStudio::CMSIS Driver:VIO:Board@1.0.0 */
 #define RTE_VIO_BOARD
 
