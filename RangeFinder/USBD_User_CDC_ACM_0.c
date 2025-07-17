@@ -47,15 +47,12 @@ typedef struct {
   uint8_t data[MAX_CMD_SIZE];
 } DISPLAY_DRIVER_CMD_t;
 
-extern int32_t display_driver_get_cmd_len(uint8_t cmd_type);
-extern int32_t display_driver_populate_cmd_struct(uint8_t cmd_type, uint8_t* data, DISPLAY_DRIVER_CMD_t* cmd);
-extern int32_t display_driver_exec_cmd(DISPLAY_DRIVER_CMD_t* cmd);
 extern osEventFlagsId_t usbd_ef;
  
 // Local Variables
 static   CDC_LINE_CODING        cdc_acm_line_coding = { 0U, 0U, 0U, 0U };
 static uint8_t cdc_rx_buf[RX_BUF_SIZE];
-uint8_t cmd[RX_BUF_SIZE];
+uint8_t cdc_cmd_buf[RX_BUF_SIZE];
 uint8_t rx_count;
 static uint16_t rx_size;
  
@@ -185,7 +182,7 @@ void USBD_CDC0_ACM_DataReceived (uint32_t len) {
 
         if ((char)char_data == '\r') { /* Carriege Return (Enter Key)*/
           USBD_CDC_ACM_PutChar(DEFAULT_PORT, (int)'\n');
-          memcpy(cmd, cdc_rx_buf, rx_count);
+          memcpy(cdc_cmd_buf, cdc_rx_buf, rx_count);
           state = IDLE;
           /* notify cmd received */
           (void)osEventFlagsSet(usbd_ef, CMD_RECEIVED_FLAG);

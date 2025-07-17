@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "Driver_Common.h"
 #include "Driver_I2C.h"
@@ -22,6 +23,7 @@ typedef struct {
 
 static void main_thread(void* args);
 static void usbd_thread(void* args);
+extern int32_t display_driver_parse_and_exec_cmd(ssd1306_obj_t* obj, uint8_t* data, uint16_t len);
 
 int32_t i2c_write(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, const uint8_t* cmd ,const uint8_t cmd_len);
 int32_t i2c_read(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, uint8_t* data, const uint8_t data_len);
@@ -73,8 +75,16 @@ int32_t i2c_read_wrap(void* obj, uint8_t* data, const uint8_t data_len) {
 }
 
 static void main_thread(void* args) {
-    volatile int32_t ret;
+    while (1) {
+        vioSetSignal(vioLED3, vioLEDon);
+        osDelay(500U);
+        vioSetSignal(vioLED3, vioLEDoff);
+        osDelay(500U);
+    }
+}
 
+static void init_display_default_config(void) {
+    volatile int32_t ret;
     osDelay(100U);
     while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_fundamental_set_display_on(&ssd1306_obj.reg, 0x00);
@@ -103,41 +113,30 @@ static void main_thread(void* args) {
     while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_fundamental_set_display_on(&ssd1306_obj.reg, 0x01);
     while (pI2Cdrv->GetStatus().busy) {}
-
-    int16_t contrast = 0;
-    int8_t ratio = 50;
-    int8_t direction = ratio;
-    while (1) {
-        while (pI2Cdrv->GetStatus().busy) {}
-        ret = ssd1306_fundamental_set_contrast(&ssd1306_obj.reg, (uint8_t)(contrast));
-        contrast += direction;
-        if (contrast > (uint16_t)(0x00FFU)) {
-            direction = -ratio;
-            contrast = 0x00FFU;
-        } else if (contrast < (uint16_t)(0x0000U)) {
-            direction = ratio;
-            contrast = 0x0000U;
-        }
-        vioSetSignal(vioLED3, vioLEDon);
-        osDelay(500U);
-        vioSetSignal(vioLED3, vioLEDoff);
-        osDelay(500U);
-    }
 }
 
-extern uint8_t cmd[256];
+extern uint8_t cdc_cmd_buf[256];
 extern uint8_t rx_count;
 static void usbd_thread(void* args) {
     (void)args;
     const char cmd_prompt_str[] = "Enter display command: ";
     const char cr_lf[] = "\r\n";
+    char rsp_buf[256] = {0};
+    int32_t ret;
 
     USBD_Initialize(0U);
     USBD_Connect(0U);
+    init_display_default_config();
 
     for (;;) {
-        USBD_CDC_ACM_WriteData(0, (uint8_t*)(void*)cmd_prompt_str, strlen(cmd_prompt_str));
+        // USBD_CDC_ACM_WriteData(0, (uint8_t*)(void*)cmd_prompt_str, strlen(cmd_prompt_str));
         (void)osEventFlagsWait(usbd_ef, CMD_RECEIVED_FLAG, osFlagsWaitAny, osWaitForever);
+        if ((ret = display_driver_parse_and_exec_cmd(&ssd1306_obj, cdc_cmd_buf, rx_count)) < 0) {
+            memset(rsp_buf, 0, sizeof(rsp_buf));
+            snprintf(rsp_buf, sizeof(rsp_buf), "Command failed with error: %d\r\n", ret);
+            USBD_CDC_ACM_WriteData(0, (uint8_t*)(void*)rsp_buf, strlen(rsp_buf));
+        }
+        while (pI2Cdrv->GetStatus().busy) {}
     }
 
 }
