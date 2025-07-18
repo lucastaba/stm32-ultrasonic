@@ -3,9 +3,6 @@
 
 #include <stdint.h>
 
-#define SSD1306_I2C_ADDR_0                                   (0x3C)
-#define SSD1306_I2C_ADDR_1                                   (0x3D)
-
 #define SSD1306_CTRL_BYTE_CMD                                (0x00)
 #define SSD1306_CTRL_BYTE_DATA                               (0x40)
 

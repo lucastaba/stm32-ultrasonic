@@ -6,7 +6,7 @@
 
 #include "Driver_I2C.h"
 
-#include "ssd1306_reg.h"
+#include "ssd1306.h"
 
 #define DISPLAY_DRIVER_MAX_CMD_SIZE (4U)
 #define DISPLAY_DRIVER_CMD_BUF_SIZE (256U)
@@ -147,7 +147,7 @@ static const char* display_driver_cmd_str_table[MAX_CMD_LEN] = {
 };
 
 /* API prototypes to handle commands */
-int32_t display_driver_parse_and_exec_cmd(ssd1306_obj_t* obj, uint8_t* data, uint16_t len);
+int32_t display_driver_parse_and_exec_cmd(SSD1306_Object_t* obj, uint8_t* data, uint16_t len);
 
 /* Private prototypes */
 static uint8_t cmd_buf[DISPLAY_DRIVER_CMD_BUF_SIZE];
@@ -156,12 +156,12 @@ static uint16_t cmd_len;
 static void display_driver_copy_data_to_internal_buf(uint8_t* data, uint16_t len);
 static void display_driver_clean_internal_buf();
 static int32_t display_driver_parse_cmd(DISPLAY_DRIVER_CMD_t* cmd);
-static int32_t display_driver_exec_cmd(ssd1306_obj_t* obj, DISPLAY_DRIVER_CMD_t* cmd);
+static int32_t display_driver_exec_cmd(SSD1306_Object_t* obj, DISPLAY_DRIVER_CMD_t* cmd);
 static int32_t display_driver_search_cmd(const char* cmd_str);
 static void display_driver_internal_buf_str_to_upper();
 
 /* API Implementation */
-int32_t display_driver_parse_and_exec_cmd(ssd1306_obj_t* obj, uint8_t* data, uint16_t len) {
+int32_t display_driver_parse_and_exec_cmd(SSD1306_Object_t* obj, uint8_t* data, uint16_t len) {
     DISPLAY_DRIVER_CMD_t cmd;
 
     if (len > DISPLAY_DRIVER_MAX_CMD_LEN) {
@@ -237,50 +237,50 @@ static int32_t display_driver_parse_cmd(DISPLAY_DRIVER_CMD_t* cmd) {
     return DISPLAY_DRIVER_SUCCESS;
 }
 
-static int32_t display_driver_exec_cmd(ssd1306_obj_t* obj, DISPLAY_DRIVER_CMD_t* cmd) {
+static int32_t display_driver_exec_cmd(SSD1306_Object_t* obj, DISPLAY_DRIVER_CMD_t* cmd) {
     int32_t ret;
     switch (cmd->type) {
         case SET_CONTRAST:
-            ret = ssd1306_fundamental_set_contrast(&(obj->reg), cmd->data[0]);
+            ret = SSD1306_SetContrast(obj, cmd->data[0]);
             break;
         case SET_ENTIRE_DISPLAY_ON:
-            ret = ssd1306_fundamental_set_entire_display_on(&(obj->reg), cmd->data[0]);
+            ret = SSD1306_SetDisplayContent(obj, cmd->data[0]);
             break;
         case SET_DISPLAY_NORMAL_OR_INVERSE:
-            ret = ssd1306_fundamental_set_display_normal_or_inverse(&(obj->reg), cmd->data[0]);
+            ret = SSD1306_SetDisplayColorInverse(obj, cmd->data[0]);
             break;
         case SET_DISPLAY_ON:
-            ret = ssd1306_fundamental_set_display_on(&(obj->reg), cmd->data[0]);
+            ret = SSD1306_DisplayON(obj, cmd->data[0]);
             break;
         case SET_HW_CONFIG_SET_DISPLAY_START_LINE:
-            ret = ssd1306_hw_config_set_display_start_line(&(obj->reg), cmd->data[0]);
+            // ret = ssd1306_hw_config_set_display_start_line(&(obj->reg), cmd->data[0]);
             break;
         case SET_HW_CONFIG_SET_SEGMENT_REMAP:
-            ret = ssd1306_hw_config_set_segment_remap(&(obj->reg), cmd->data[0]);
+            // ret = ssd1306_hw_config_set_segment_remap(&(obj->reg), cmd->data[0]);
             break;
         case SET_HW_CONFIG_SET_MULTIPLEX_RATIO:
-            ret = ssd1306_hw_config_set_multiplex_ratio(&(obj->reg), cmd->data[0]);
+            // ret = ssd1306_hw_config_set_multiplex_ratio(&(obj->reg), cmd->data[0]);
             break;
         case SET_HW_CONFIG_SET_COM_OUTPUT_SCAN_DIRECTION:
-            ret = ssd1306_hw_config_set_com_output_scan_direction(&(obj->reg), cmd->data[0]);
+            // ret = ssd1306_hw_config_set_com_output_scan_direction(&(obj->reg), cmd->data[0]);
             break;
         case SET_HW_CONFIG_SET_DISPLAY_OFFSET:
-            ret = ssd1306_hw_config_set_display_offset(&(obj->reg), cmd->data[0]);
+            // ret = ssd1306_hw_config_set_display_offset(&(obj->reg), cmd->data[0]);
             break;
         case SET_HW_CONFIG_SET_COM_PIN_CONFIG:
-            ret = ssd1306_hw_config_set_com_pin_config(&(obj->reg), cmd->data[0]);
+            // ret = ssd1306_hw_config_set_com_pin_config(&(obj->reg), cmd->data[0]);
             break;
         case SET_TIMING_AND_DRIVING_SCHEME_SET_DISPLAY_CLOCK_DIV:
-            ret = ssd1306_timing_and_driving_scheme_set_display_clock_div_clock_freq(&(obj->reg), cmd->data[0], cmd->data[1]);
+            // ret = ssd1306_timing_and_driving_scheme_set_display_clock_div_clock_freq(&(obj->reg), cmd->data[0], cmd->data[1]);
             break;
         case SET_TIMING_AND_DRIVING_SCHEME_SET_PRE_CHARGE_PERIOD:
-            ret = ssd1306_timing_and_driving_scheme_set_pre_charge_period(&(obj->reg), cmd->data[0], cmd->data[1]);
+            // ret = ssd1306_timing_and_driving_scheme_set_pre_charge_period(&(obj->reg), cmd->data[0], cmd->data[1]);
             break;
         case SET_TIMING_AND_DRIVING_SCHEME_SET_VCOMH_DESELECT_LEVEL:
-            ret = ssd1306_timing_and_driving_scheme_set_vcomh_deselect_level(&(obj->reg), cmd->data[0]);
+            // ret = ssd1306_timing_and_driving_scheme_set_vcomh_deselect_level(&(obj->reg), cmd->data[0]);
             break;
         case SET_TIMING_AND_DRIVING_SCHEME_SET_NOP:
-            ret = ssd1306_timing_and_driving_scheme_nop(&(obj->reg));
+            // ret = ssd1306_timing_and_driving_scheme_nop(&(obj->reg));
             break;
         default:
             break;

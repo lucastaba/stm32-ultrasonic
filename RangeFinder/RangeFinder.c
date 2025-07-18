@@ -12,41 +12,50 @@
 #include "I2C_STM32.h"
 
 #include "main.h"
-#include "ssd1306_reg.h"
+#include "ssd1306.h"
+
+#define SSD1306_I2C_ADDR_0 (0x3C)
+#define SSD1306_I2C_ADDR_1 (0x3D)
 
 #define CMD_RECEIVED_FLAG (1U << 0U)
+#define MAX_DISPLAY_DATA_LEN (256U)
 
-typedef struct {
-    ARM_DRIVER_I2C* pDrv;
-    ssd1306_ctx_t ctx;
-} ssd1306_obj_t;
+/* External */
+extern int32_t display_driver_parse_and_exec_cmd(SSD1306_Object_t* obj, uint8_t* data, uint16_t len);
+extern uint8_t cdc_cmd_buf[256];
+extern uint8_t rx_count;
 
+/* Local Functions/Prototypes/Variables definition */
 static void main_thread(void* args);
 static void usbd_thread(void* args);
-extern int32_t display_driver_parse_and_exec_cmd(ssd1306_obj_t* obj, uint8_t* data, uint16_t len);
-
-int32_t i2c_write(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, const uint8_t* cmd ,const uint16_t cmd_len);
-int32_t i2c_read(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, uint8_t* data, const uint16_t data_len);
-int32_t i2c_write_wrap(void* obj, const uint8_t reg, const uint8_t* cmd ,const uint16_t cmd_len);
-int32_t i2c_read_wrap(void* obj, const uint8_t reg, uint8_t* data, const uint16_t data_len);
+static int32_t DisplayWriteI2C(const uint8_t addr, const uint8_t reg, const uint8_t* data, const uint16_t len);
 
 static ARM_DRIVER_I2C* pI2Cdrv = &Driver_I2C1;
-ssd1306_obj_t ssd1306_obj;
-osThreadId_t main_thread_id;
-osThreadId_t usbd_thread_id;
+static SSD1306_Object_t display;
+static SSD1306_IO_t displayIO;
+static osThreadId_t main_thread_id;
+static osThreadId_t usbd_thread_id;
 osEventFlagsId_t usbd_ef;
 static uint8_t i2c_data[256] = {0};
 
+/* Implementation */
 void main_app(void) {
     volatile osStatus_t status;
 
+    /* Board */
     vioInit();
     (void)(pI2Cdrv->Initialize(NULL));
     (void)(pI2Cdrv->PowerControl(ARM_POWER_FULL));
-    ssd1306_obj.pDrv = pI2Cdrv;
-    ssd1306_obj.ctx.WriteReg = i2c_write_wrap;
-    ssd1306_obj.ctx.ReadReg = i2c_read_wrap;
-    ssd1306_obj.ctx.handle = &ssd1306_obj;
+    
+    /* Diplay */
+    displayIO.Init = NULL;
+    displayIO.DeInit = NULL;
+    displayIO.i2cAddress = SSD1306_I2C_ADDR_0;
+    displayIO.WriteReg = DisplayWriteI2C;
+    displayIO.ReadReg = NULL;
+    (void)SSD1306_RegisterIO(&display, &displayIO);
+
+    /* OS */
     status = osKernelInitialize();
     main_thread_id = osThreadNew(main_thread, NULL, NULL);
     usbd_thread_id = osThreadNew(usbd_thread, NULL, NULL);
@@ -59,27 +68,16 @@ void main_app(void) {
     (void)(pI2Cdrv->Uninitialize());
 }
 
-int32_t i2c_write(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, const uint8_t* cmd ,const uint16_t cmd_len) {
-    return pDrv->MasterTransmit((uint32_t)(slave_addr), cmd, (uint32_t)(cmd_len), false);
-}
-
-int32_t i2c_read(ARM_DRIVER_I2C* pDrv, uint8_t slave_addr, uint8_t* data, const uint16_t data_len) {
-	return 0;
-}
-
-int32_t i2c_write_wrap(void* obj, const uint8_t reg, const uint8_t* cmd ,const uint16_t cmd_len) {
-    int i;
-
-    i2c_data[0] = reg;
-    for (i = 0; i < cmd_len; i++) {
-        i2c_data[i + 1] = cmd[i];
+static int32_t DisplayWriteI2C(const uint8_t addr, const uint8_t reg, const uint8_t* data, const uint16_t len) {
+    static uint8_t displayData[MAX_DISPLAY_DATA_LEN];
+    
+    if (len > MAX_DISPLAY_DATA_LEN) {
+        return -1;
     }
 
-    return i2c_write(((ssd1306_obj_t*)obj)->pDrv, SSD1306_I2C_ADDR_0, i2c_data, cmd_len + 1);
-}
-
-int32_t i2c_read_wrap(void* obj, const uint8_t reg, uint8_t* data, const uint16_t data_len) {
-    return i2c_read(((ssd1306_obj_t*)obj)->pDrv, SSD1306_I2C_ADDR_0, data, data_len);
+    while (pI2Cdrv->GetStatus().busy) {}
+    memcpy(displayData, data, len);
+    return pI2Cdrv->MasterTransmit(addr, displayData, len, false);
 }
 
 static void main_thread(void* args) {
@@ -91,40 +89,7 @@ static void main_thread(void* args) {
     }
 }
 
-static void init_display_default_config(void) {
-    volatile int32_t ret;
-    osDelay(100U);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_fundamental_set_display_on(&ssd1306_obj.ctx, 0x00);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_hw_config_set_multiplex_ratio(&ssd1306_obj.ctx, 0x1F);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_hw_config_set_display_offset(&ssd1306_obj.ctx, 0x00);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_hw_config_set_display_start_line(&ssd1306_obj.ctx, 0x00);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_hw_config_set_segment_remap(&ssd1306_obj.ctx, 0x00);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_hw_config_set_com_output_scan_direction(&ssd1306_obj.ctx, 0x00);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_hw_config_set_com_pin_config(&ssd1306_obj.ctx, 0x00);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_fundamental_set_contrast(&ssd1306_obj.ctx, 0x1F);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_fundamental_set_entire_display_on(&ssd1306_obj.ctx, 0x01);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_fundamental_set_display_normal_or_inverse(&ssd1306_obj.ctx, 0x00);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_timing_and_driving_scheme_set_display_clock_div_clock_freq(&ssd1306_obj.ctx, 0, 0xF);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_charge_pump_set_charge_pump(&ssd1306_obj.ctx, 0x01);
-    while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_fundamental_set_display_on(&ssd1306_obj.ctx, 0x01);
-    while (pI2Cdrv->GetStatus().busy) {}
-}
 
-extern uint8_t cdc_cmd_buf[256];
-extern uint8_t rx_count;
 static void usbd_thread(void* args) {
     (void)args;
     char rsp_buf[256] = {0};
@@ -132,11 +97,10 @@ static void usbd_thread(void* args) {
 
     USBD_Initialize(0U);
     USBD_Connect(0U);
-    init_display_default_config();
 
     for (;;) {
         (void)osEventFlagsWait(usbd_ef, CMD_RECEIVED_FLAG, osFlagsWaitAny, osWaitForever);
-        if ((ret = display_driver_parse_and_exec_cmd(&ssd1306_obj, cdc_cmd_buf, rx_count)) < 0) {
+        if ((ret = display_driver_parse_and_exec_cmd(&display, cdc_cmd_buf, rx_count)) < 0) {
             memset(rsp_buf, 0, sizeof(rsp_buf));
             snprintf(rsp_buf, sizeof(rsp_buf), "Command failed with error: %d\r\n", ret);
             USBD_CDC_ACM_WriteData(0, (uint8_t*)(void*)rsp_buf, strlen(rsp_buf));
