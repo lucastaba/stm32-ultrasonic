@@ -23,7 +23,7 @@
 
 typedef struct {
     ARM_DRIVER_I2C* pDrv;
-    ssd1306_reg_t reg;
+    ssd1306_ctx_t reg;
 } ssd1306_obj_t;
 
 typedef enum {

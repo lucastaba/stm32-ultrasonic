@@ -17,9 +17,15 @@ project:
         - file: USBD_User_CDC_ACM_0.c
         - file: display_driver_cmd_helper.c
     - group: Display Driver
-      files:
-        - file: Display/Driver/Src/ssd1306_reg.c
-        - file: Display/Driver/Inc/ssd1306_reg.h
+      groups:
+        - group: Include
+          files:
+            - file: Display/Driver/Inc/ssd1306_reg.h
+            - file: Display/Driver/Inc/ssd1306.h
+        - group: Source
+          files:
+            - file: Display/Driver/Src/ssd1306_reg.c
+            - file: Display/Driver/Src/ssd1306.c
 
   # A software component is a re-usable unit that may be configurable
   components:
