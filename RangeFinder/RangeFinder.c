@@ -107,7 +107,7 @@ static void init_display_default_config(void) {
     while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_fundamental_set_display_normal_or_inverse(&ssd1306_obj.reg, 0x00);
     while (pI2Cdrv->GetStatus().busy) {}
-    ret = ssd1306_timing_and_driving_scheme_set_display_clock_div(&ssd1306_obj.reg, 0xF0);
+    ret = ssd1306_timing_and_driving_scheme_set_display_clock_div_clock_freq(&ssd1306_obj.reg, 0, 0xF);
     while (pI2Cdrv->GetStatus().busy) {}
     ret = ssd1306_charge_pump_set_charge_pump(&ssd1306_obj.reg, 0x01);
     while (pI2Cdrv->GetStatus().busy) {}

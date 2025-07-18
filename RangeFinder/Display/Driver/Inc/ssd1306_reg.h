@@ -10,7 +10,6 @@ typedef struct {
 
 /* Fundamental Commands */
 int32_t ssd1306_fundamental_set_contrast(ssd1306_reg_t* obj, const uint8_t contrast);
-int32_t ssd1306_fundamental_set_column_address(ssd1306_reg_t* obj, const uint8_t column_address);
 int32_t ssd1306_fundamental_set_entire_display_on(ssd1306_reg_t* obj, const uint8_t ram_or_on);
 int32_t ssd1306_fundamental_set_display_normal_or_inverse(ssd1306_reg_t* obj, const uint8_t normal_or_inverse);
 int32_t ssd1306_fundamental_set_display_on(ssd1306_reg_t* obj, const uint8_t on);
@@ -25,6 +24,7 @@ int32_t ssd1306_scrolling_set_scroll_vertical_scroll_area(ssd1306_reg_t* obj, co
 /* Addressing Commands */
 int32_t ssd1306_addressing_set_page_address_for_horizotal_vertical_addressing_mode(ssd1306_reg_t* obj, const uint8_t start_page_address, const uint8_t end_page_address);
 int32_t ssd1306_addressing_set_page_address_for_page_addressing_mode(ssd1306_reg_t* obj, const uint8_t start_page_address);
+int32_t ssd1306_addressing_set_column_address(ssd1306_reg_t* obj, const uint8_t column_address);
 
 /* Hardware Configuration Commands */
 int32_t ssd1306_hw_config_set_display_start_line(ssd1306_reg_t* obj, const uint8_t start_line);
@@ -35,7 +35,7 @@ int32_t ssd1306_hw_config_set_display_offset(ssd1306_reg_t* obj, const uint8_t o
 int32_t ssd1306_hw_config_set_com_pin_config(ssd1306_reg_t* obj, const uint8_t pin_config);
 
 /* Timing and Driving Scheme Commands */
-int32_t ssd1306_timing_and_driving_scheme_set_display_clock_div(ssd1306_reg_t* obj, const uint8_t clock_div);
+int32_t ssd1306_timing_and_driving_scheme_set_display_clock_div_clock_freq(ssd1306_reg_t* obj, const uint8_t clock_div, const uint8_t clock_freq);
 int32_t ssd1306_timing_and_driving_scheme_set_pre_charge_period(ssd1306_reg_t* obj, const uint8_t phase_1, const uint8_t phase_2);
 int32_t ssd1306_timing_and_driving_scheme_set_vcomh_deselect_level(ssd1306_reg_t* obj, const uint8_t level);
 int32_t ssd1306_timing_and_driving_scheme_nop(ssd1306_reg_t* obj);

@@ -109,7 +109,7 @@ int32_t ssd1306_fundamental_set_contrast(ssd1306_reg_t* obj, const uint8_t contr
     return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
 }
 
-int32_t ssd1306_fundamental_set_column_address(ssd1306_reg_t* obj, const uint8_t column_address) {
+int32_t ssd1306_addressing_set_column_address(ssd1306_reg_t* obj, const uint8_t column_address) {
     // Implementation needed (not present in current .c file)
     return SSD1306_CMD_SUCCESS;
 }
@@ -193,10 +193,10 @@ int32_t ssd1306_hw_config_set_com_pin_config(ssd1306_reg_t* obj, const uint8_t p
     return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
 }
 
-int32_t ssd1306_timing_and_driving_scheme_set_display_clock_div(ssd1306_reg_t* obj, const uint8_t clock_div) {
+int32_t ssd1306_timing_and_driving_scheme_set_display_clock_div_clock_freq(ssd1306_reg_t* obj, const uint8_t clock_div, const uint8_t clock_freq) {
     ssd1306_data_buffer[0] = SSD1306_CTRL_BYTE_CMD;
     ssd1306_data_buffer[1] = SSD1306_CMD_TIMING_SET_DISPLAY_CLK_DIVIDE_RATIO_AND_FREQ;
-    ssd1306_data_buffer[2] = clock_div;
+    ssd1306_data_buffer[2] = ((uint8_t)(clock_freq << 4) & 0xF0) | (uint8_t)(clock_div & 0x0F);
     return ssd1306_i2c_write_cmd(obj, ssd1306_data_buffer, 3);
 }
 

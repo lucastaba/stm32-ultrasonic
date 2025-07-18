@@ -29,8 +29,7 @@ typedef struct {
 typedef enum {
     /* Fundamental Commands */
     SET_CONTRAST = 0U,
-    SET_COMLUMN_ADDRESS,
-    SET_ENTINE_DISPLAY_ON,
+    SET_ENTIRE_DISPLAY_ON,
     SET_DISPLAY_NORMAL_OR_INVERSE,
     SET_DISPLAY_ON,
 
@@ -78,8 +77,7 @@ typedef struct {
 static const DISPLAY_DRIVER_CMD_t display_driver_cmd_table[MAX_CMD_LEN] = {
     /* Fundamental Commands */
     {SET_CONTRAST, 1, {0}},
-    {SET_COMLUMN_ADDRESS, 1, {0}},
-    {SET_ENTINE_DISPLAY_ON, 1, {0}},
+    {SET_ENTIRE_DISPLAY_ON, 1, {0}},
     {SET_DISPLAY_NORMAL_OR_INVERSE, 1, {0}},
     {SET_DISPLAY_ON, 1, {0}},
 
@@ -115,8 +113,7 @@ static const DISPLAY_DRIVER_CMD_t display_driver_cmd_table[MAX_CMD_LEN] = {
 static const char* display_driver_cmd_str_table[MAX_CMD_LEN] = {
     /* Fundamental Commands */
     "SET_CONTRAST",
-    "SET_COMLUMN_ADDRESS",
-    "SET_ENTINE_DISPLAY_ON",
+    "SET_ENTIRE_DISPLAY_ON",
     "SET_DISPLAY_NORMAL_OR_INVERSE",
     "SET_DISPLAY_ON",
 
@@ -246,13 +243,44 @@ static int32_t display_driver_exec_cmd(ssd1306_obj_t* obj, DISPLAY_DRIVER_CMD_t*
         case SET_CONTRAST:
             ret = ssd1306_fundamental_set_contrast(&(obj->reg), cmd->data[0]);
             break;
-        case SET_COMLUMN_ADDRESS:
-            break;
-        case SET_ENTINE_DISPLAY_ON:
+        case SET_ENTIRE_DISPLAY_ON:
+            ret = ssd1306_fundamental_set_entire_display_on(&(obj->reg), cmd->data[0]);
             break;
         case SET_DISPLAY_NORMAL_OR_INVERSE:
+            ret = ssd1306_fundamental_set_display_normal_or_inverse(&(obj->reg), cmd->data[0]);
             break;
         case SET_DISPLAY_ON:
+            ret = ssd1306_fundamental_set_display_on(&(obj->reg), cmd->data[0]);
+            break;
+        case SET_HW_CONFIG_SET_DISPLAY_START_LINE:
+            ret = ssd1306_hw_config_set_display_start_line(&(obj->reg), cmd->data[0]);
+            break;
+        case SET_HW_CONFIG_SET_SEGMENT_REMAP:
+            ret = ssd1306_hw_config_set_segment_remap(&(obj->reg), cmd->data[0]);
+            break;
+        case SET_HW_CONFIG_SET_MULTIPLEX_RATIO:
+            ret = ssd1306_hw_config_set_multiplex_ratio(&(obj->reg), cmd->data[0]);
+            break;
+        case SET_HW_CONFIG_SET_COM_OUTPUT_SCAN_DIRECTION:
+            ret = ssd1306_hw_config_set_com_output_scan_direction(&(obj->reg), cmd->data[0]);
+            break;
+        case SET_HW_CONFIG_SET_DISPLAY_OFFSET:
+            ret = ssd1306_hw_config_set_display_offset(&(obj->reg), cmd->data[0]);
+            break;
+        case SET_HW_CONFIG_SET_COM_PIN_CONFIG:
+            ret = ssd1306_hw_config_set_com_pin_config(&(obj->reg), cmd->data[0]);
+            break;
+        case SET_TIMING_AND_DRIVING_SCHEME_SET_DISPLAY_CLOCK_DIV:
+            ret = ssd1306_timing_and_driving_scheme_set_display_clock_div_clock_freq(&(obj->reg), cmd->data[0], cmd->data[1]);
+            break;
+        case SET_TIMING_AND_DRIVING_SCHEME_SET_PRE_CHARGE_PERIOD:
+            ret = ssd1306_timing_and_driving_scheme_set_pre_charge_period(&(obj->reg), cmd->data[0], cmd->data[1]);
+            break;
+        case SET_TIMING_AND_DRIVING_SCHEME_SET_VCOMH_DESELECT_LEVEL:
+            ret = ssd1306_timing_and_driving_scheme_set_vcomh_deselect_level(&(obj->reg), cmd->data[0]);
+            break;
+        case SET_TIMING_AND_DRIVING_SCHEME_SET_NOP:
+            ret = ssd1306_timing_and_driving_scheme_nop(&(obj->reg));
             break;
         default:
             break;
