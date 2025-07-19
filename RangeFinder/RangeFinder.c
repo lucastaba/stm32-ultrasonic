@@ -54,7 +54,7 @@ void main_app(void) {
     displayIO.WriteReg = DisplayWriteI2C;
     displayIO.ReadReg = NULL;
 
-    display.contrast = 255;
+    display.contrast = 245;
     display.content = ALL_ON;
     display.color = NORMAL;
     display.displayState = ON;
@@ -67,9 +67,10 @@ void main_app(void) {
     display.pinDirection = RIGHT_TO_LEFT;
     display.clockFreq = 0xF;
     display.clockDiv = 1;
-    display.phasePeriod1 = 1; /* in DCLOCKs (DCLOCK = clockFreq/clockDiv) */
-    display.phasePeriod2 = 1;
-    display.deselectLevel = DESELECT_LEVEL_1;
+    display.phasePeriod1 = 2; /* in DCLOCKs (DCLOCK = clockFreq/clockDiv) */
+    display.phasePeriod2 = 2;
+    display.deselectLevel = DESELECT_LEVEL_2;
+    display.chargePumpEnabled = true;
 
     (void)SSD1306_RegisterIO(&display, &displayIO);
 
@@ -94,8 +95,9 @@ static int32_t DisplayWriteI2C(const uint8_t addr, const uint8_t reg, const uint
     }
 
     while (pI2Cdrv->GetStatus().busy) {}
-    memcpy(displayData, data, len);
-    return pI2Cdrv->MasterTransmit(addr, displayData, len, false);
+    i2c_data[0] = reg;
+    memcpy(i2c_data + 1, data, len);
+    return pI2Cdrv->MasterTransmit(addr, i2c_data, len + 1, false);
 }
 
 static void main_thread(void* args) {

@@ -8,8 +8,8 @@
 
 /* Types */
 typedef enum {
-    ALL_ON = 0,
-    FOLLOW_RAM,
+    FOLLOW_RAM = 0,
+    ALL_ON,
 } SSD1306_DISPLAY_CONTENT_t;
 
 typedef enum {
@@ -84,6 +84,7 @@ typedef struct {
     uint8_t phasePeriod1;
     uint8_t phasePeriod2;
     SSD1306_DISPLAY_DESELECT_LEVEL_t deselectLevel;
+    bool chargePumpEnabled;
 } SSD1306_Object_t;
 
 /* Most Common Class Driver API */
@@ -115,6 +116,7 @@ int32_t SSD1306_SetPreChargePhasePeriod1(SSD1306_Object_t* obj, const uint8_t pe
 int32_t SSD1306_SetPreChargePhasePeriod2(SSD1306_Object_t* obj, const uint8_t period);
 int32_t SSD1306_SetVoltageDeselectLevel(SSD1306_Object_t* obj, const SSD1306_DISPLAY_DESELECT_LEVEL_t deselectLevel);
 int32_t SSD1306_NOP(SSD1306_Object_t* obj);
+int32_t SSD1306_EnableChargePump(SSD1306_Object_t* obj, const bool enable);
 
 int32_t SSD1306_RegisterIO(SSD1306_Object_t* obj, SSD1306_IO_t* io);
 int32_t SSD1306_ReadID(SSD1306_Object_t* obj, uint32_t* id);

@@ -96,6 +96,10 @@ int32_t SSD1306_Init(SSD1306_Object_t* obj) {
     if (SSD1306_SetVoltageDeselectLevel(obj, obj->deselectLevel) < 0) {
         return SSD1306_CMD_FAILED;
     }
+    
+    if (SSD1306_EnableChargePump(obj, obj->chargePumpEnabled) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
 
     if (SSD1306_SetDisplayState(obj, ds) < 0) {
         return SSD1306_CMD_FAILED;
@@ -290,6 +294,15 @@ int32_t SSD1306_SetVoltageDeselectLevel(SSD1306_Object_t* obj, const SSD1306_DIS
 
 int32_t SSD1306_NOP(SSD1306_Object_t* obj) {
     return ssd1306_timing_and_driving_scheme_nop(&(obj->ctx));
+}
+
+int32_t SSD1306_EnableChargePump(SSD1306_Object_t* obj, const bool enable) {
+    if (ssd1306_charge_pump_set_charge_pump(&(obj->ctx), enable) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
+
+    obj->chargePumpEnabled = enable;
+    return SSD1306_SUCCESS;
 }
 
 int32_t SSD1306_RegisterIO(SSD1306_Object_t* obj, SSD1306_IO_t* io) {
