@@ -53,6 +53,24 @@ void main_app(void) {
     displayIO.i2cAddress = SSD1306_I2C_ADDR_0;
     displayIO.WriteReg = DisplayWriteI2C;
     displayIO.ReadReg = NULL;
+
+    display.contrast = 255;
+    display.content = ALL_ON;
+    display.color = NORMAL;
+    display.displayState = ON;
+    display.startLine = 0;
+    display.segmentMap = SEG0_TO_0;
+    display.multiplexRatio = 63; /* HEIGHT - 1 */
+    display.scanDirection = COM0_TO_N;
+    display.displayOffset = 0;
+    display.pinSequence = SEQUENTIAL;
+    display.pinDirection = RIGHT_TO_LEFT;
+    display.clockFreq = 0xF;
+    display.clockDiv = 1;
+    display.phasePeriod1 = 1; /* in DCLOCKs (DCLOCK = clockFreq/clockDiv) */
+    display.phasePeriod2 = 1;
+    display.deselectLevel = DESELECT_LEVEL_1;
+
     (void)SSD1306_RegisterIO(&display, &displayIO);
 
     /* OS */
@@ -97,6 +115,7 @@ static void usbd_thread(void* args) {
 
     USBD_Initialize(0U);
     USBD_Connect(0U);
+    SSD1306_Init(&display);
 
     for (;;) {
         (void)osEventFlagsWait(usbd_ef, CMD_RECEIVED_FLAG, osFlagsWaitAny, osWaitForever);

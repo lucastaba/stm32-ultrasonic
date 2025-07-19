@@ -250,37 +250,40 @@ static int32_t display_driver_exec_cmd(SSD1306_Object_t* obj, DISPLAY_DRIVER_CMD
             ret = SSD1306_SetDisplayColorInverse(obj, cmd->data[0]);
             break;
         case SET_DISPLAY_ON:
-            ret = SSD1306_DisplayON(obj, cmd->data[0]);
+            ret = SSD1306_SetDisplayState(obj, cmd->data[0]);
             break;
         case SET_HW_CONFIG_SET_DISPLAY_START_LINE:
-            // ret = ssd1306_hw_config_set_display_start_line(&(obj->reg), cmd->data[0]);
+            ret = SSD1306_SetDisplayStartLine(obj, cmd->data[0]);
             break;
         case SET_HW_CONFIG_SET_SEGMENT_REMAP:
-            // ret = ssd1306_hw_config_set_segment_remap(&(obj->reg), cmd->data[0]);
+            ret = SSD1306_SetSegmentRemap(obj, cmd->data[0]);
             break;
         case SET_HW_CONFIG_SET_MULTIPLEX_RATIO:
-            // ret = ssd1306_hw_config_set_multiplex_ratio(&(obj->reg), cmd->data[0]);
+            ret = SSD1306_SetMultiplexRatio(obj, cmd->data[0]);
             break;
         case SET_HW_CONFIG_SET_COM_OUTPUT_SCAN_DIRECTION:
-            // ret = ssd1306_hw_config_set_com_output_scan_direction(&(obj->reg), cmd->data[0]);
+            ret = SSD1306_SetScanDirection(obj, cmd->data[0]);
             break;
         case SET_HW_CONFIG_SET_DISPLAY_OFFSET:
-            // ret = ssd1306_hw_config_set_display_offset(&(obj->reg), cmd->data[0]);
+            ret = SSD1306_SetDisplayOffset(obj, cmd->data[0]);
             break;
         case SET_HW_CONFIG_SET_COM_PIN_CONFIG:
-            // ret = ssd1306_hw_config_set_com_pin_config(&(obj->reg), cmd->data[0]);
+            ret = SSD1306_SetPinSequenceConfig(obj, cmd->data[0]);
+            ret |= SSD1306_SetPinDirectionConfig(obj, cmd->data[1]);
             break;
         case SET_TIMING_AND_DRIVING_SCHEME_SET_DISPLAY_CLOCK_DIV:
-            // ret = ssd1306_timing_and_driving_scheme_set_display_clock_div_clock_freq(&(obj->reg), cmd->data[0], cmd->data[1]);
+            ret = SSD1306_SetClockDiv(obj, cmd->data[0]);
+            ret |= SSD1306_SetClock(obj, cmd->data[1]);
             break;
         case SET_TIMING_AND_DRIVING_SCHEME_SET_PRE_CHARGE_PERIOD:
-            // ret = ssd1306_timing_and_driving_scheme_set_pre_charge_period(&(obj->reg), cmd->data[0], cmd->data[1]);
+            ret = SSD1306_SetPreChargePhasePeriod1(obj, cmd->data[0]);
+            ret |= SSD1306_SetPreChargePhasePeriod2(obj, cmd->data[1]);
             break;
         case SET_TIMING_AND_DRIVING_SCHEME_SET_VCOMH_DESELECT_LEVEL:
-            // ret = ssd1306_timing_and_driving_scheme_set_vcomh_deselect_level(&(obj->reg), cmd->data[0]);
+            ret = SSD1306_SetVoltageDeselectLevel(obj, cmd->data[0]);
             break;
         case SET_TIMING_AND_DRIVING_SCHEME_SET_NOP:
-            // ret = ssd1306_timing_and_driving_scheme_nop(&(obj->reg));
+            ret = SSD1306_NOP(obj);
             break;
         default:
             break;
