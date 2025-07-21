@@ -58,6 +58,13 @@ typedef enum {
     HORIZONTAL_LEFT = 0x01,
 } SSD1306_DISPLAY_HORIZONTAL_SCROLL_t;
 
+typedef enum {
+    HORIZONTAL_ADDRESSING_MODE,
+    VERTICAL_ADDRESSING_MODE,
+    PAGE_ADDRESSING_MODE,
+    INVALID_ADDRESSING_MODE,
+} DISPLAY_DRIVER_ADDRESSING_MODE_t;
+
 typedef struct {
     SSD1306_DISPLAY_HORIZONTAL_SCROLL_t direction;
     uint8_t startPage;
@@ -136,6 +143,10 @@ int32_t SSD1306_SetVHScrollConfig(SSD1306_Object_t* obj, const SSD1306_Horizonta
 int32_t SSD1306_ActivateScrolling(SSD1306_Object_t* obj);
 int32_t SSD1306_DeactivateScrolling(SSD1306_Object_t* obj);
 int32_t SSD1306_SetVScrollArea(SSD1306_Object_t* obj, const uint8_t topFixed, const uint8_t rows);
+int32_t SSD1306_SetColumnStartPageAddress(SSD1306_Object_t* obj, const uint8_t startAddress);
+int32_t SSD1306_SetColumnAddress(SSD1306_Object_t* obj, const uint8_t startAddress, const uint8_t endAddress);
+int32_t SSD1306_SetPageAddressForHVMode(SSD1306_Object_t* obj, const uint8_t startAddress, const uint8_t endAddress);
+int32_t SSD1306_SetPageStartForPageMode(SSD1306_Object_t* obj, const uint8_t startAddress);
 int32_t SSD1306_SetDisplayStartLine(SSD1306_Object_t* obj, const uint8_t startLine);
 int32_t SSD1306_SetSegmentRemap(SSD1306_Object_t* obj, const SSD1306_DISPLAY_SEGMENT_MAP_t segmentMap);
 int32_t SSD1306_SetMultiplexRatio(SSD1306_Object_t* obj, const uint8_t multiplexRatio);

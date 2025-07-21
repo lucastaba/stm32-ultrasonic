@@ -20,9 +20,12 @@
 #define SSD1306_CMD_SCROLLING_SET_SCROLL_VERTICAL_AREA       (0xA3)
 
 /* Addressing Commands */
+#define SSD1306_CMD_ADDRESSING_SET_LOWER_COLUMN_START_ADDR   (0X00)
+#define SSD1306_CMD_ADDRESSING_SET_HIGHER_COLUMN_START_ADDR  (0X10)
 #define SSD1306_CMD_ADDRESSING_SET_MEMORY_ADDR_MODE          (0x20)
 #define SSD1306_CMD_ADDRESSING_SET_COLUMN_ADDR               (0x21)
 #define SSD1306_CMD_ADDRESSING_SET_PAGE_ADDR                 (0x22)
+#define SSD1306_CMD_ADDRESSING_SET_PAGE_START_ADDR           (0xB0)
 
 /* Hardware Configuration Commands */
 #define SSD1306_CMD_HW_CONFIG_SET_DISPLAY_START_LINE         (0x40)
@@ -57,12 +60,13 @@
 #define SSD1306_CMD_SCROLLING_SET_SCROLL_AREA_MASK           (0x7F)
 
 /* Addressing Setting Commands Masks */
-#define SSD1306_CMD_ADDRESSING_SET_LOW_COLUMN_ADDR_MASK      (0x0F)
-#define SSD1306_CMD_ADDRESSING_SET_HIGH_COLUMN_ADDR_MASK     (0x1F)
-#define SSD1306_CMD_ADDRESSING_SET_ADDR_MODE_MASK            (0x03)
-#define SSD1306_CMD_ADDRESSING_SET_COLUMN_ADDR_MASK          (0x3F)
+#define SSD1306_CMD_ADDRESSING_SET_COLUMN_START_ADDR_MASK    (0x0F)
+#define SSD1306_CMD_ADDRESSING_SET_MEMORY_ADDR_MODE_MASK     (0x03)
+#define SSD1306_CMD_ADDRESSING_SET_COLUMN_ADDR_MASK          (0x7F)
 #define SSD1306_CMD_ADDRESSING_SET_PAGE_ADDR_MASK            (0x07)
-#define SSD1306_CMD_ADDRESSING_SET_PAGE_START_ADDR_MASK      (0xB7)
+#define SSD1306_CMD_ADDRESSING_SET_PAGE_START_ADDR_MASK      (0x07)
+#define SSD1306_CMD_ADDRESSING_LOWER_NIBBLE_MASK             (0x0F)
+#define SSD1306_CMD_ADDRESSING_HIGHER_NIBBLE_MASK            (0xF0)
 
 /* Hardware Configuration Commands Masks */
 #define SSD1306_CMD_HW_CONFIG_SET_DISPLAY_START_LINE_MASK    (0x3F)
@@ -119,9 +123,12 @@ int32_t ssd1306_scrolling_deactivate(ssd1306_ctx_t* ctx);
 int32_t ssd1306_scrolling_set_scroll_vertical_scroll_area(ssd1306_ctx_t* ctx, const uint8_t n_rows_top_fixed, const uint8_t n_rows);
 
 /* Addressing Commands */
+int32_t ssd1306_addressing_set_lower_column_start_address_for_page_addressing_mode(ssd1306_ctx_t* ctx, const uint8_t lower_nibble);
+int32_t ssd1306_addressing_set_higher_column_start_address_for_page_addressing_mode(ssd1306_ctx_t* ctx, const uint8_t higher_nibble);
+int32_t ssd1306_addressing_set_memory_addressing_mode(ssd1306_ctx_t* ctx, const uint8_t addressing_mode);
+int32_t ssd1306_addressing_set_column_address(ssd1306_ctx_t* ctx, const uint8_t start_address, const uint8_t end_address);
 int32_t ssd1306_addressing_set_page_address_for_horizotal_vertical_addressing_mode(ssd1306_ctx_t* ctx, const uint8_t start_page_address, const uint8_t end_page_address);
 int32_t ssd1306_addressing_set_page_address_for_page_addressing_mode(ssd1306_ctx_t* ctx, const uint8_t start_page_address);
-int32_t ssd1306_addressing_set_column_address(ssd1306_ctx_t* ctx, const uint8_t column_address);
 
 /* Hardware Configuration Commands */
 int32_t ssd1306_hw_config_set_display_start_line(ssd1306_ctx_t* ctx, const uint8_t start_line);

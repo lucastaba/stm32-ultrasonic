@@ -21,11 +21,6 @@ int32_t ssd1306_fundamental_set_contrast(ssd1306_ctx_t* ctx, const uint8_t contr
     return ssd1306_write_reg(ctx, SSD1306_CTRL_BYTE_CMD, data, sizeof(data));
 }
 
-int32_t ssd1306_addressing_set_column_address(ssd1306_ctx_t* ctx, const uint8_t column_address) {
-    // Implementation needed (not present in current .c file)
-    return SSD1306_CMD_SUCCESS;
-}
-
 int32_t ssd1306_fundamental_set_entire_display_on(ssd1306_ctx_t* ctx, const uint8_t ram_or_on) {
     uint8_t data[] = {
         SSD1306_CMD_FUNDAMENTAL_SET_ENTIRE_DISPLAY_ON | (SSD1306_CMD_FUNDAMENTAL_SET_ENTIRE_DISPLAY_ON_MASK & ram_or_on),
@@ -95,14 +90,49 @@ int32_t ssd1306_scrolling_set_scroll_vertical_scroll_area(ssd1306_ctx_t* ctx, co
     return ssd1306_write_reg(ctx, SSD1306_CTRL_BYTE_CMD, data, sizeof(data));
 }
 
-int32_t ssd1306_addressing_set_page_address_for_horizotal_vertical_addressing_mode(ssd1306_ctx_t* ctx, const uint8_t start_page_address, const uint8_t end_page_address) {
+int32_t ssd1306_addressing_set_lower_column_start_address_for_page_addressing_mode(ssd1306_ctx_t* ctx, const uint8_t lower_nibble) {
     uint8_t data[] = {
+        SSD1306_CMD_ADDRESSING_SET_LOWER_COLUMN_START_ADDR | (SSD1306_CMD_ADDRESSING_SET_COLUMN_START_ADDR_MASK & lower_nibble),
     };
     return ssd1306_write_reg(ctx, SSD1306_CTRL_BYTE_CMD, data, sizeof(data));
 }
 
-int32_t ssd1306_addressing_set_page_address_for_page_addressing_mode(ssd1306_ctx_t* ctx, const uint8_t start_page_address) {
+int32_t ssd1306_addressing_set_higher_column_start_address_for_page_addressing_mode(ssd1306_ctx_t* ctx, const uint8_t higher_nibble) {
     uint8_t data[] = {
+        SSD1306_CMD_ADDRESSING_SET_HIGHER_COLUMN_START_ADDR | (SSD1306_CMD_ADDRESSING_SET_COLUMN_START_ADDR_MASK & higher_nibble),
+    };
+    return ssd1306_write_reg(ctx, SSD1306_CTRL_BYTE_CMD, data, sizeof(data));
+}
+
+int32_t ssd1306_addressing_set_memory_addressing_mode(ssd1306_ctx_t* ctx, const uint8_t addressing_mode) {
+    uint8_t data[] = {
+        SSD1306_CMD_ADDRESSING_SET_MEMORY_ADDR_MODE,
+        (SSD1306_CMD_ADDRESSING_SET_MEMORY_ADDR_MODE_MASK & addressing_mode),
+    };
+    return ssd1306_write_reg(ctx, SSD1306_CTRL_BYTE_CMD, data, sizeof(data));
+}
+
+int32_t ssd1306_addressing_set_column_address(ssd1306_ctx_t* ctx, const uint8_t start_address, const uint8_t end_address) {
+    uint8_t data[] = {
+        SSD1306_CMD_ADDRESSING_SET_COLUMN_ADDR,
+        (SSD1306_CMD_ADDRESSING_SET_COLUMN_ADDR_MASK & start_address),
+        (SSD1306_CMD_ADDRESSING_SET_COLUMN_ADDR_MASK & end_address),
+    };
+    return ssd1306_write_reg(ctx, SSD1306_CTRL_BYTE_CMD, data, sizeof(data));
+}
+
+int32_t ssd1306_addressing_set_page_address_for_horizotal_vertical_addressing_mode(ssd1306_ctx_t* ctx, const uint8_t start_page_address, const uint8_t end_page_address) {
+    uint8_t data[] = {
+        SSD1306_CMD_ADDRESSING_SET_PAGE_ADDR,
+        (SSD1306_CMD_ADDRESSING_SET_PAGE_ADDR_MASK & start_page_address),
+        (SSD1306_CMD_ADDRESSING_SET_PAGE_ADDR_MASK & end_page_address),
+    };
+    return ssd1306_write_reg(ctx, SSD1306_CTRL_BYTE_CMD, data, sizeof(data));
+}
+
+int32_t ssd1306_addressing_set_page_address_for_page_addressing_mode(ssd1306_ctx_t* ctx, const uint8_t start_address) {
+    uint8_t data[] = {
+        SSD1306_CMD_ADDRESSING_SET_PAGE_START_ADDR | (SSD1306_CMD_ADDRESSING_SET_PAGE_START_ADDR_MASK & start_address),
     };
     return ssd1306_write_reg(ctx, SSD1306_CTRL_BYTE_CMD, data, sizeof(data));
 }

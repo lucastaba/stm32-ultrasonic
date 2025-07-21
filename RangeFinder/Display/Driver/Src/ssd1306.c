@@ -193,6 +193,39 @@ int32_t SSD1306_SetVScrollArea(SSD1306_Object_t* obj, const uint8_t topFixed, co
     return SSD1306_SUCCESS;
 }
 
+int32_t SSD1306_SetColumnStartPageAddress(SSD1306_Object_t* obj, const uint8_t startAddress) {
+    if ((ssd1306_addressing_set_lower_column_start_address_for_page_addressing_mode(&(obj->ctx), (SSD1306_CMD_ADDRESSING_LOWER_NIBBLE_MASK & startAddress)) |
+         ssd1306_addressing_set_higher_column_start_address_for_page_addressing_mode(&(obj->ctx), (SSD1306_CMD_ADDRESSING_HIGHER_NIBBLE_MASK & startAddress))) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
+
+    return SSD1306_SUCCESS;
+}
+
+int32_t SSD1306_SetColumnAddress(SSD1306_Object_t* obj, const uint8_t startAddress, const uint8_t endAddress) {
+    if (ssd1306_addressing_set_column_address(&(obj->ctx), startAddress, endAddress) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
+
+    return SSD1306_SUCCESS;
+}
+
+int32_t SSD1306_SetPageAddressForHVMode(SSD1306_Object_t* obj, const uint8_t startAddress, const uint8_t endAddress) {
+    if (ssd1306_addressing_set_page_address_for_horizotal_vertical_addressing_mode(&(obj->ctx), startAddress, endAddress) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
+
+    return SSD1306_SUCCESS;
+}
+
+int32_t SSD1306_SetPageStartForPageMode(SSD1306_Object_t* obj, const uint8_t startAddress) {
+    if (ssd1306_addressing_set_page_address_for_page_addressing_mode(&(obj->ctx), startAddress) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
+
+    return SSD1306_SUCCESS;
+}
+
 int32_t SSD1306_SetDisplayStartLine(SSD1306_Object_t* obj, const uint8_t startLine) {
     uint8_t sl = startLine & SSD1306_DISPLAY_START_LINE_MASK;
 
