@@ -48,6 +48,31 @@ typedef enum {
     DESELECT_LEVEL_3 = 0x03,
 } SSD1306_DISPLAY_DESELECT_LEVEL_t;
 
+typedef enum {
+    VERTICAL_RIGHT = 0x01,
+    VERTICAL_LEFT = 0x02,
+} SSD1306_DISPLAY_VERTICAL_HORIZONTAL_SCROLL_t;
+
+typedef enum {
+    HORIZONTAL_RIGHT = 0x00,
+    HORIZONTAL_LEFT = 0x01,
+} SSD1306_DISPLAY_HORIZONTAL_SCROLL_t;
+
+typedef struct {
+    SSD1306_DISPLAY_HORIZONTAL_SCROLL_t direction;
+    uint8_t startPage;
+    uint8_t endPage;
+    uint8_t interval;
+} SSD1306_HorizontalScrollSetup_t;
+
+typedef struct {
+    SSD1306_DISPLAY_VERTICAL_HORIZONTAL_SCROLL_t direction;
+    uint8_t startPage;
+    uint8_t endPage;
+    uint8_t interval;
+    uint8_t offset;
+} SSD1306_VerticalScrollSetup_t;
+
 /* IO API */
 typedef int32_t (*SSD1306_IO_Init_Fptr)(void);
 typedef int32_t (*SSD1306_IO_DeInit_Fptr)(void);
@@ -85,6 +110,9 @@ typedef struct {
     uint8_t phasePeriod2;
     SSD1306_DISPLAY_DESELECT_LEVEL_t deselectLevel;
     bool chargePumpEnabled;
+    SSD1306_HorizontalScrollSetup_t hScrollConfig;
+    SSD1306_VerticalScrollSetup_t vScrollConfig;
+    bool isScrollActive;
 } SSD1306_Object_t;
 
 /* Most Common Class Driver API */
@@ -103,6 +131,11 @@ int32_t SSD1306_SetContrast(SSD1306_Object_t* obj, const uint8_t contrast);
 int32_t SSD1306_SetDisplayContent(SSD1306_Object_t* obj, const SSD1306_DISPLAY_CONTENT_t content);
 int32_t SSD1306_SetDisplayColorInverse(SSD1306_Object_t* obj, const SSD1306_DISPLAY_COLOR_t color);
 int32_t SSD1306_SetDisplayState(SSD1306_Object_t* obj, const SSD1306_DISPLAY_STATE_t displayState);
+int32_t SSD1306_SetVScrollConfig(SSD1306_Object_t* obj, const SSD1306_VerticalScrollSetup_t* config);
+int32_t SSD1306_SetVHScrollConfig(SSD1306_Object_t* obj, const SSD1306_HorizontalScrollSetup_t* config);
+int32_t SSD1306_ActivateScrolling(SSD1306_Object_t* obj);
+int32_t SSD1306_DeactivateScrolling(SSD1306_Object_t* obj);
+int32_t SSD1306_SetVScrollArea(SSD1306_Object_t* obj, const uint8_t topFixed, const uint8_t rows);
 int32_t SSD1306_SetDisplayStartLine(SSD1306_Object_t* obj, const uint8_t startLine);
 int32_t SSD1306_SetSegmentRemap(SSD1306_Object_t* obj, const SSD1306_DISPLAY_SEGMENT_MAP_t segmentMap);
 int32_t SSD1306_SetMultiplexRatio(SSD1306_Object_t* obj, const uint8_t multiplexRatio);

@@ -13,10 +13,8 @@
 #define SSD1306_CMD_FUNDAMENTAL_SET_DISPLAY_ON               (0xAE)
 
 /* Scrolling Commands */
-#define SSD1306_CMD_SCROLLING_SET_SCROLL_RIGHT               (0x26)
-#define SSD1306_CMD_SCROLLING_SET_SCROLL_LEFT                (0x27)
-#define SSD1306_CMD_SCROLLING_SET_SCROLL_UP                  (0x29)
-#define SSD1306_CMD_SCROLLING_SET_SCROLL_DOWN                (0x2A)
+#define SSD1306_CMD_SCROLLING_SET_SCROLL_H_SETUP             (0x26)
+#define SSD1306_CMD_SCROLLING_SET_SCROLL_V_H_SETUP           (0x28)
 #define SSD1306_CMD_SCROLLING_SET_SCROLL_STOP                (0x2E)
 #define SSD1306_CMD_SCROLLING_SET_SCROLL_START               (0x2F)
 #define SSD1306_CMD_SCROLLING_SET_SCROLL_VERTICAL_AREA       (0xA3)
@@ -50,7 +48,10 @@
 #define SSD1306_CMD_FUNDAMENTAL_SET_DISPLAY_ON_MASK          (0x01)
 
 /* Scrolling Commands Masks */
+#define SSD1306_CMD_SCROLLING_SET_SCROLL_H_SETUP_MASK        (0x01)
+#define SSD1306_CMD_SCROLLING_SET_SCROLL_V_H_SETUP_MASK      (0x03)
 #define SSD1306_CMD_SCROLLING_SET_SCROLL_PAGE_ADDR_MASK      (0x07)
+#define SSD1306_CMD_SCROLLING_SET_SCROLL_INTERVAL_MASK       (0x07)
 #define SSD1306_CMD_SCROLLING_SET_SCROLL_OFFSET_MASK         (0x3F)
 #define SSD1306_CMD_SCROLLING_SET_SCROLL_FIXED_AREA_MASK     (0x3F)
 #define SSD1306_CMD_SCROLLING_SET_SCROLL_AREA_MASK           (0x7F)
@@ -86,6 +87,10 @@
 #define SSD1306_GDDRAM_ADDR_PAGE5                            (0x05)
 #define SSD1306_GDDRAM_ADDR_PAGE6                            (0x06)
 #define SSD1306_GDDRAM_ADDR_PAGE7                            (0x07)
+
+/* Dummy Byte */
+#define SSD1306_CMD_DUMMY_BYTE_0                             (0x00)
+#define SSD1306_CMD_DUMMY_BYTE_1                             (0xFF)
 
 typedef int32_t (*SSD1306_Write_Func)(void* handle, const uint8_t reg, const uint8_t* data , const uint16_t len);
 typedef int32_t (*SSD1306_Read_Func)(void* handle, const uint8_t reg, uint8_t* data, const uint16_t len);

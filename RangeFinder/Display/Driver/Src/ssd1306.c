@@ -150,6 +150,49 @@ int32_t SSD1306_SetDisplayState(SSD1306_Object_t* obj, const SSD1306_DISPLAY_STA
     return SSD1306_SUCCESS;
 }
 
+int32_t SSD1306_SetVScrollConfig(SSD1306_Object_t* obj, const SSD1306_VerticalScrollSetup_t* config) {
+    if (ssd1306_scrolling_continuous_vertical_scroll_setup(&(obj->ctx), config->direction, config->startPage, config->endPage, config->interval, config->offset) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
+
+    obj->vScrollConfig = *config;
+    return SSD1306_SUCCESS;
+}
+
+int32_t SSD1306_SetVHScrollConfig(SSD1306_Object_t* obj, const SSD1306_HorizontalScrollSetup_t* config) {
+    if (ssd1306_scrolling_continuous_horizontal_scroll_setup(&(obj->ctx), config->direction, config->startPage, config->endPage, config->interval) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
+
+    obj->hScrollConfig = *config;
+    return SSD1306_SUCCESS;
+}
+
+int32_t SSD1306_ActivateScrolling(SSD1306_Object_t* obj) {
+    if (ssd1306_scrolling_activate(&(obj->ctx)) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
+
+    obj->isScrollActive = true;
+    return SSD1306_SUCCESS;
+}
+
+int32_t SSD1306_DeactivateScrolling(SSD1306_Object_t* obj) {
+    if (ssd1306_scrolling_deactivate(&(obj->ctx)) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
+
+    obj->isScrollActive = false;
+    return SSD1306_SUCCESS;
+}
+
+int32_t SSD1306_SetVScrollArea(SSD1306_Object_t* obj, const uint8_t topFixed, const uint8_t rows) {
+    if (ssd1306_scrolling_set_scroll_vertical_scroll_area(&(obj->ctx), topFixed, rows) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
+    return SSD1306_SUCCESS;
+}
+
 int32_t SSD1306_SetDisplayStartLine(SSD1306_Object_t* obj, const uint8_t startLine) {
     uint8_t sl = startLine & SSD1306_DISPLAY_START_LINE_MASK;
 
