@@ -8,10 +8,13 @@
 #include "cmsis_vio.h"
 #include "cmsis_os2.h"
 #include "rl_usb.h"
+#include "lvgl.h"
 
 #include "I2C_STM32.h"
 
 #include "main.h"
+#include "src/display/lv_display.h"
+#include "src/misc/lv_timer.h"
 #include "ssd1306.h"
 
 #define SSD1306_I2C_ADDR_0 (0x3C)
@@ -19,6 +22,11 @@
 
 #define CMD_RECEIVED_FLAG (1U << 0U)
 #define MAX_DISPLAY_DATA_LEN (256U)
+
+#define DISPLAY_WIDTH              (128U)
+#define DISPLAY_HEIGHT             (32U)
+#define DISPLAY_COLOR_DEPTH        (1U)
+#define DISPLAY_RENDER_BUFFER_SIZE (DISPLAY_WIDTH*DISPLAY_HEIGHT/10*DISPLAY_COLOR_DEPTH)
 
 /* External */
 extern int32_t display_driver_parse_and_exec_cmd(SSD1306_Object_t* obj, uint8_t* data, uint16_t len);
@@ -28,15 +36,20 @@ extern uint8_t rx_count;
 /* Local Functions/Prototypes/Variables definition */
 static void main_thread(void* args);
 static void usbd_thread(void* args);
+static void ui_thread(void* args);
 static int32_t DisplayWriteI2C(const uint8_t addr, const uint8_t reg, const uint8_t* data, const uint16_t len);
+static uint32_t os_get_ticks(void);
+static void display_write_data(lv_display_t* display, const lv_area_t* area, uint8_t *px_map);
 
 static ARM_DRIVER_I2C* pI2Cdrv = &Driver_I2C1;
 static SSD1306_Object_t display;
 static SSD1306_IO_t displayIO;
 static osThreadId_t main_thread_id;
 static osThreadId_t usbd_thread_id;
+static osThreadId_t ui_thread_id;
 osEventFlagsId_t usbd_ef;
 static uint8_t i2c_data[256] = {0};
+static uint8_t render_buffer[DISPLAY_RENDER_BUFFER_SIZE];
 
 /* Implementation */
 void main_app(void) {
@@ -78,6 +91,7 @@ void main_app(void) {
     status = osKernelInitialize();
     main_thread_id = osThreadNew(main_thread, NULL, NULL);
     usbd_thread_id = osThreadNew(usbd_thread, NULL, NULL);
+    ui_thread_id = osThreadNew(ui_thread, NULL, NULL);
     usbd_ef = osEventFlagsNew(NULL);
     status = osKernelStart();
 
@@ -128,6 +142,49 @@ static void usbd_thread(void* args) {
         }
         while (pI2Cdrv->GetStatus().busy) {}
     }
+}
+
+static void ui_thread(void* args) {
+    const uint32_t counterDelay = 1000;
+    uint32_t counterRemainingTime = counterDelay;
+    uint32_t counter = 0;
+    uint32_t nextTime;
+    uint32_t waitTime;
+    lv_display_t* display = NULL;
+
+    lv_init();
+    lv_tick_set_cb(os_get_ticks);
+    display = lv_display_create(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    lv_display_set_buffers(display, render_buffer, NULL, DISPLAY_RENDER_BUFFER_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
+    lv_display_set_flush_cb(display, display_write_data);
+    for (;;) {
+        nextTime = lv_timer_handler();
+        if (nextTime == LV_NO_TIMER_READY) {
+            nextTime = LV_DEF_REFR_PERIOD;
+        }
+
+        if (nextTime > counterRemainingTime) {
+            counter++;
+            if (counter > 9) {
+                counter = 0;
+            }
+            waitTime = counterRemainingTime;
+            counterRemainingTime = counterDelay;
+        } else {
+            counterRemainingTime -= nextTime;
+            waitTime = nextTime;
+        }
+
+        osDelay(waitTime);
+    }
+}
+
+static uint32_t os_get_ticks(void) {
+    return osKernelGetTickCount();
+}
+
+static void display_write_data(lv_display_t* display, const lv_area_t* area, uint8_t *px_map) {
+    lv_display_flush_ready(display);
 }
 
 void HAL_Delay(uint32_t Delay) {
