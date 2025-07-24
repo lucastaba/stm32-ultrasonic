@@ -7,8 +7,9 @@ project:
     - pack: ARM::CMSIS-Driver_STM32@^1.2.0
     - pack: ARM::CMSIS-RTX@5.9.0
     - pack: Keil::STM32F4xx_DFP@^3.0.0
-    - pack: WeActStudio::BlackPill@^1.0.0
     - pack: Keil::MDK-Middleware@8.1.0
+    - pack: WeActStudio::BlackPill@^1.0.0
+    - pack: LVGL::lvgl@9.3.0
 
   groups:
     - group: Source Files
@@ -45,6 +46,7 @@ project:
       language-C: c11
     - component: WeActStudio::CMSIS Driver:VIO:Board@1.0.0
     - component: ARM::CMSIS Driver:USB Device:Custom
+    - component: LVGL::LVGL&LVGL9:Essential
 
   linker:
     - script: STM32CubeMX/BlackPill/STM32CubeMX/STM32CubeIDE/STM32F411CEUX_FLASH.ld

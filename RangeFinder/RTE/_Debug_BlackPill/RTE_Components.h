@@ -38,6 +38,9 @@
 /* Keil::USB&MDK:Device@8.0.0 */
 #define RTE_USB_Device_0                /* USB Device 0 */
 
+/* LVGL::LVGL&LVGL9:Essential@9.3.0 */
+/*! \brief Enable LVGL */
+#define RTE_GRAPHICS_LVGL
 /* WeActStudio::CMSIS Driver:VIO:Board@1.0.0 */
 #define RTE_VIO_BOARD
 
