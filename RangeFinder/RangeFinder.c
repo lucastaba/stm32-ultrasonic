@@ -150,13 +150,18 @@ static void ui_thread(void* args) {
     uint32_t counter = 0;
     uint32_t nextTime;
     uint32_t waitTime;
-    lv_display_t* display = NULL;
+    lv_display_t* displayUI = NULL;
+    lv_obj_t* counterLabel = NULL;
 
+    SSD1306_Init(&display);
     lv_init();
     lv_tick_set_cb(os_get_ticks);
-    display = lv_display_create(DISPLAY_WIDTH, DISPLAY_HEIGHT);
-    lv_display_set_buffers(display, render_buffer, NULL, DISPLAY_RENDER_BUFFER_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
-    lv_display_set_flush_cb(display, display_write_data);
+    displayUI = lv_display_create(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    lv_display_set_buffers(displayUI, render_buffer, NULL, DISPLAY_RENDER_BUFFER_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
+    lv_display_set_flush_cb(displayUI, display_write_data);
+    counterLabel = lv_label_create(lv_screen_active());
+    lv_label_set_text(counterLabel, "Hello World");
+    lv_obj_align(counterLabel, LV_ALIGN_TOP_LEFT, 0, 0);
     for (;;) {
         nextTime = lv_timer_handler();
         if (nextTime == LV_NO_TIMER_READY) {
