@@ -147,4 +147,7 @@ int32_t ssd1306_timing_and_driving_scheme_nop(ssd1306_ctx_t* ctx);
 /* Charge Pump Commands */
 int32_t ssd1306_charge_pump_set_charge_pump(ssd1306_ctx_t* ctx, const uint8_t enable);
 
+/* Write Data to GDDRAM Commands */
+int32_t ssd1306_gddram_write_data(ssd1306_ctx_t* ctx, const uint8_t* data, const uint16_t data_size);
+
 #endif /* SSD1306_REG_H */

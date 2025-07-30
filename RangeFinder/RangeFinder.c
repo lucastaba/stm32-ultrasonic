@@ -23,10 +23,11 @@
 #define CMD_RECEIVED_FLAG (1U << 0U)
 #define MAX_DISPLAY_DATA_LEN (256U)
 
-#define DISPLAY_WIDTH              (128U)
-#define DISPLAY_HEIGHT             (32U)
-#define DISPLAY_COLOR_DEPTH        (1U)
-#define DISPLAY_RENDER_BUFFER_SIZE (DISPLAY_WIDTH*DISPLAY_HEIGHT/10*DISPLAY_COLOR_DEPTH)
+#define DISPLAY_WIDTH                (128U)
+#define DISPLAY_HEIGHT               (32U)
+#define DISPLAY_COLOR_DEPTH          (1U)
+#define DISPLAY_RENDER_BUFFER_DIVIDE (1U)
+#define DISPLAY_RENDER_BUFFER_SIZE   (DISPLAY_WIDTH*DISPLAY_HEIGHT/DISPLAY_RENDER_BUFFER_DIVIDE*DISPLAY_COLOR_DEPTH)
 
 /* External */
 extern int32_t display_driver_parse_and_exec_cmd(SSD1306_Object_t* obj, uint8_t* data, uint16_t len);
@@ -67,8 +68,8 @@ void main_app(void) {
     displayIO.WriteReg = DisplayWriteI2C;
     displayIO.ReadReg = NULL;
 
-    display.contrast = 245;
-    display.content = ALL_ON;
+    display.contrast = 255;
+    display.content = FOLLOW_RAM;
     display.color = NORMAL;
     display.displayState = ON;
     display.startLine = 0;
@@ -90,7 +91,7 @@ void main_app(void) {
     /* OS */
     status = osKernelInitialize();
     main_thread_id = osThreadNew(main_thread, NULL, NULL);
-    usbd_thread_id = osThreadNew(usbd_thread, NULL, NULL);
+    // usbd_thread_id = osThreadNew(usbd_thread, NULL, NULL);
     ui_thread_id = osThreadNew(ui_thread, NULL, NULL);
     usbd_ef = osEventFlagsNew(NULL);
     status = osKernelStart();
@@ -152,12 +153,21 @@ static void ui_thread(void* args) {
     uint32_t waitTime;
     lv_display_t* displayUI = NULL;
     lv_obj_t* counterLabel = NULL;
+    int i;
+    const uint8_t dummyByte = 0;
+    volatile int ret;
 
-    SSD1306_Init(&display);
+    (void)SSD1306_Init(&display);
+    (void)SSD1306_SetMemoryAddressMode(&display, HORIZONTAL_ADDRESSING_MODE);
+    (void)SSD1306_SetColumnAddress(&display, 0, 127);
+    (void)SSD1306_SetPageAddressForHVMode(&display, SSD1306_GDDRAM_ADDR_PAGE0, SSD1306_GDDRAM_ADDR_PAGE3);
+    for (i = 0; i < 512; i++) {
+        ret = SSD1306_GDDRAMwrite(&display, &dummyByte, 1);
+    }
     lv_init();
     lv_tick_set_cb(os_get_ticks);
     displayUI = lv_display_create(DISPLAY_WIDTH, DISPLAY_HEIGHT);
-    lv_display_set_buffers(displayUI, render_buffer, NULL, DISPLAY_RENDER_BUFFER_SIZE, LV_DISPLAY_RENDER_MODE_PARTIAL);
+    lv_display_set_buffers(displayUI, render_buffer, NULL, DISPLAY_RENDER_BUFFER_SIZE, LV_DISPLAY_RENDER_MODE_FULL);
     lv_display_set_flush_cb(displayUI, display_write_data);
     counterLabel = lv_label_create(lv_screen_active());
     lv_label_set_text(counterLabel, "Hello World");
@@ -188,8 +198,21 @@ static uint32_t os_get_ticks(void) {
     return osKernelGetTickCount();
 }
 
-static void display_write_data(lv_display_t* display, const lv_area_t* area, uint8_t *px_map) {
-    lv_display_flush_ready(display);
+static void display_write_data(lv_display_t* displayUI, const lv_area_t* area, uint8_t *px_map) {
+    uint8_t pageStart = 0;
+    uint8_t pageEnd = 0;
+    uint8_t startLine = 0;
+    uint16_t dataSize = 0;
+    const uint8_t pageHeight = 8;
+
+    pageStart = area->y1 % pageHeight;
+    pageEnd = area->y2 % pageHeight;
+    startLine = area->x1;
+    dataSize = (area->x2 - area->x1 + 1)*(area->y2 - area->y1 + 1);
+
+    SSD1306_GDDRAMwrite(&display, px_map, dataSize);
+
+    lv_display_flush_ready(displayUI);
 }
 
 void HAL_Delay(uint32_t Delay) {

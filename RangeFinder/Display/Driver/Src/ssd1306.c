@@ -202,6 +202,14 @@ int32_t SSD1306_SetColumnStartPageAddress(SSD1306_Object_t* obj, const uint8_t s
     return SSD1306_SUCCESS;
 }
 
+int32_t SSD1306_SetMemoryAddressMode(SSD1306_Object_t* obj, const DISPLAY_DRIVER_ADDRESSING_MODE_t mode) {
+    if (ssd1306_addressing_set_memory_addressing_mode(&(obj->ctx), mode) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
+
+    return SSD1306_SUCCESS;
+}
+
 int32_t SSD1306_SetColumnAddress(SSD1306_Object_t* obj, const uint8_t startAddress, const uint8_t endAddress) {
     if (ssd1306_addressing_set_column_address(&(obj->ctx), startAddress, endAddress) < 0) {
         return SSD1306_CMD_FAILED;
@@ -378,6 +386,14 @@ int32_t SSD1306_EnableChargePump(SSD1306_Object_t* obj, const bool enable) {
     }
 
     obj->chargePumpEnabled = enable;
+    return SSD1306_SUCCESS;
+}
+
+int32_t SSD1306_GDDRAMwrite(SSD1306_Object_t* obj, const uint8_t* data, const uint16_t dataSize) {
+    if (ssd1306_gddram_write_data(&(obj->ctx), data, dataSize) < 0) {
+        return SSD1306_CMD_FAILED;
+    }
+
     return SSD1306_SUCCESS;
 }
 

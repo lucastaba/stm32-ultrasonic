@@ -144,6 +144,7 @@ int32_t SSD1306_ActivateScrolling(SSD1306_Object_t* obj);
 int32_t SSD1306_DeactivateScrolling(SSD1306_Object_t* obj);
 int32_t SSD1306_SetVScrollArea(SSD1306_Object_t* obj, const uint8_t topFixed, const uint8_t rows);
 int32_t SSD1306_SetColumnStartPageAddress(SSD1306_Object_t* obj, const uint8_t startAddress);
+int32_t SSD1306_SetMemoryAddressMode(SSD1306_Object_t* obj, const DISPLAY_DRIVER_ADDRESSING_MODE_t mode);
 int32_t SSD1306_SetColumnAddress(SSD1306_Object_t* obj, const uint8_t startAddress, const uint8_t endAddress);
 int32_t SSD1306_SetPageAddressForHVMode(SSD1306_Object_t* obj, const uint8_t startAddress, const uint8_t endAddress);
 int32_t SSD1306_SetPageStartForPageMode(SSD1306_Object_t* obj, const uint8_t startAddress);
@@ -161,6 +162,7 @@ int32_t SSD1306_SetPreChargePhasePeriod2(SSD1306_Object_t* obj, const uint8_t pe
 int32_t SSD1306_SetVoltageDeselectLevel(SSD1306_Object_t* obj, const SSD1306_DISPLAY_DESELECT_LEVEL_t deselectLevel);
 int32_t SSD1306_NOP(SSD1306_Object_t* obj);
 int32_t SSD1306_EnableChargePump(SSD1306_Object_t* obj, const bool enable);
+int32_t SSD1306_GDDRAMwrite(SSD1306_Object_t* obj, const uint8_t* data, const uint16_t dataSize);
 
 int32_t SSD1306_RegisterIO(SSD1306_Object_t* obj, SSD1306_IO_t* io);
 int32_t SSD1306_ReadID(SSD1306_Object_t* obj, uint32_t* id);

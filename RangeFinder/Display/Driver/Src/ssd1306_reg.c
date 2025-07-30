@@ -219,3 +219,7 @@ int32_t ssd1306_charge_pump_set_charge_pump(ssd1306_ctx_t* ctx, const uint8_t en
     };
     return ssd1306_write_reg(ctx, SSD1306_CTRL_BYTE_CMD, data, sizeof(data));
 }
+
+int32_t ssd1306_gddram_write_data(ssd1306_ctx_t* ctx, const uint8_t* data, const uint16_t data_size) {
+    return ssd1306_write_reg(ctx, SSD1306_CTRL_BYTE_DATA, data, data_size);
+}
